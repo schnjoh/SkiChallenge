@@ -74,8 +74,8 @@ func _build_environment() -> void:
 	add_child(we)
 	sun = DirectionalLight3D.new()
 	sun.name = "Sun"
-	# winter sun: south-west, ~28 deg elevation
-	sun.rotation_degrees = Vector3(-28.0, 200.0, 0.0)
+	# light travels along -Z of the node: yaw -45 deg -> towards north-east, i.e. sun in the south-west
+	sun.rotation_degrees = Vector3(-28.0, -45.0, 0.0)
 	sun.light_energy = 1.25
 	sun.light_color = Color(1.0, 0.97, 0.92)
 	sun.shadow_enabled = shadows

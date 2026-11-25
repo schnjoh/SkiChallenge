@@ -63,6 +63,7 @@ _Automatisch erzeugt von `game/scripts/tools/validate_track.gd` am 2026-11-25._
 | Alle Tore | 41/41 | alle | ✅ |
 | Zeit | 1:55.29 | 1:46.95–1:56.68 (1:50–2:00 × 0.972) | ✅ |
 | Ø-Tempo (3D-Länge) | 100.6 km/h | 101–107 km/h (±3 %) | ✅ |
+| Netz-/Baumkontakte | 0 | 0 | ✅ |
 | Höchsttempo | 151.5 km/h | ≤ 153 km/h | ✅ |
 | Spitzen-g (Boden) | 3.55 g bei s=94 | ≤ 3,8 g | ✅ |
 | 100 km/h nach dem Start | 8.3 s (s=146 m) | ≈ 8,5 s | ✅ |
