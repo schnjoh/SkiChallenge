@@ -1,0 +1,95 @@
+{
+ "note": "Editable. s = horizontal distance from start along line.json (m).",
+ "sections": [
+  {
+   "name": "Start",
+   "s": 0.0,
+   "width_m": 25.0,
+   "osm_offset_m": 0.0
+  },
+  {
+   "name": "Mausefalle",
+   "s": 182.0,
+   "width_m": 30.0,
+   "osm_offset_m": 1.0
+  },
+  {
+   "name": "Kompression",
+   "s": 256.0,
+   "width_m": 30.0,
+   "osm_offset_m": 0.4
+  },
+  {
+   "name": "Karussell",
+   "s": 396.0,
+   "width_m": 35.0,
+   "osm_offset_m": 1.9
+  },
+  {
+   "name": "Steilhang",
+   "s": 521.9,
+   "width_m": 50.0,
+   "osm_offset_m": 1.1
+  },
+  {
+   "name": "Brückenschuss",
+   "s": 709.9,
+   "width_m": 15.0,
+   "osm_offset_m": 1.0
+  },
+  {
+   "name": "Gschöss",
+   "s": 1045.9,
+   "width_m": 18.0,
+   "osm_offset_m": 0.5
+  },
+  {
+   "name": "Alte Schneise",
+   "s": 1371.9,
+   "width_m": 35.0,
+   "osm_offset_m": 1.0
+  },
+  {
+   "name": "Seidlalmsprung",
+   "s": 1597.9,
+   "width_m": 35.0,
+   "osm_offset_m": 1.1
+  },
+  {
+   "name": "Lärchenschuss",
+   "s": 2013.9,
+   "width_m": 25.0,
+   "osm_offset_m": 0.5
+  },
+  {
+   "name": "Oberhausberg",
+   "s": 2309.9,
+   "width_m": 25.0,
+   "osm_offset_m": 1.2
+  },
+  {
+   "name": "Hausbergkante",
+   "s": 2419.9,
+   "width_m": 35.0,
+   "osm_offset_m": 2.0
+  },
+  {
+   "name": "Traverse",
+   "s": 2575.8,
+   "width_m": 40.0,
+   "osm_offset_m": 0.8
+  },
+  {
+   "name": "Zielhang",
+   "s": 2789.8,
+   "width_m": 60.0,
+   "osm_offset_m": 0.4
+  },
+  {
+   "name": "Zielsprung",
+   "s": 2949.8,
+   "width_m": 70.0,
+   "osm_offset_m": 0.5
+  }
+ ]
+}

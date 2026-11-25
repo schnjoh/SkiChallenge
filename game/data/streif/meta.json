@@ -1,0 +1,40 @@
+{
+ "track": "Streif, Kitzbühel",
+ "crs": "EPSG:31255",
+ "mapping": "x = E - E0, y = h (m a.s.l.), z = -(N - N0); E0/N0 = core SW corner; pixel (col,row) is a cell centre, row 0 = north",
+ "origin_e0": -73592.0,
+ "origin_n0": 254075.0,
+ "origin_height": 0.0,
+ "core": {
+  "file": "height.r32",
+  "format": "float32_le",
+  "width": 3072,
+  "height": 3072,
+  "res_m": 1.0,
+  "e0": -73592.0,
+  "n0": 254075.0,
+  "size_x_m": 3072.0,
+  "size_z_m": 3072.0,
+  "world_min_x": 0.0,
+  "world_min_z": -3072.0
+ },
+ "far": {
+  "file": "far_height.r32",
+  "format": "float32_le",
+  "width": 1600,
+  "height": 1600,
+  "res_m": 5.0,
+  "e0": -76056.0,
+  "n0": 251611.0,
+  "size_x_m": 8000.0,
+  "size_z_m": 8000.0,
+  "world_min_x": -2464.0,
+  "world_min_z": -5536.0
+ },
+ "snow_depth_m": 0.3,
+ "generated": "2026-11-25",
+ "sources": [
+  "Datenquelle: Land Tirol - data.tirol.gv.at (DGM/DOM 50 cm, CC BY 4.0)",
+  "© OpenStreetMap contributors (ODbL 1.0)"
+ ]
+}

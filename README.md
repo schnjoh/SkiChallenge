@@ -1,4 +1,4 @@
-# SkiChallange – „Schussfahrt“
+# SkiChallenge – „Schussfahrt“
 
 Ski-Abfahrtsspiel auf echten Geländedaten. Erste Strecke: die Streif in Kitzbühel.
 Gelände aus offenen Daten des Landes Tirol (CC BY 4.0), Pistenlinie aus OpenStreetMap (ODbL).
@@ -8,7 +8,7 @@ Gelände aus offenen Daten des Landes Tirol (CC BY 4.0), Pistenlinie aus OpenStr
 ## Setup
 Voraussetzungen: Godot **4.7.2** (Befehl `godot`), Python 3.14 (getestet), `git-lfs`.
 ```bash
-git lfs install && git clone git@github.com:schnjoh/SkiChallange.git && cd SkiChallange
+git lfs install && git clone git@github.com:schnjoh/SkiChallenge.git && cd SkiChallenge
 cd game && godot --headless --import && godot      # Spiel starten
 ```
 Tests: `cd game && godot --headless -s addons/gut/gut_cmdln.gd`

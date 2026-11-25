@@ -1,0 +1,7 @@
+{
+ "count": 98420,
+ "format": "float32_le (x, z, height_m)",
+ "min_height_m": 3.0,
+ "removed_buildings": 4954,
+ "removed_corridor": 297
+}
