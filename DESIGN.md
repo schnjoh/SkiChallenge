@@ -52,8 +52,8 @@ tools/pipeline (Python, rasterio/GDAL)          game/ (Godot 4.7, GDScript stati
 ```
 
 ### 4.1 Koordinaten & Daten
-- Projekt-CRS der Pipeline: Landes-CRS der Tiroler Daten (siehe `docs/data-sources.md`, voraussichtlich
-  EPSG:31254 MGI/Austria GK West). Godot: 1 Einheit = 1 m, **+X = Ost, −Z = Nord, Y = Höhe ü. A.**
+- Projekt-CRS der Pipeline: **EPSG:31255** (MGI / Austria GK Central, Zone M31 der Tiroler
+  ALS-Daten; Orthofotos werden aus EPSG:31254 umprojiziert, siehe `docs/data-sources.md`). Godot: 1 Einheit = 1 m, **+X = Ost, −Z = Nord, Y = Höhe ü. A.**
   minus `origin_height` (Metadaten), Ursprung = SW-Ecke des Ausschnitts → alle Werte in `meta.json`.
 - Ausschnitt: Bounding Box der OSM-Linie + 300 m Rand. Auflösung im Spiel: Höhen 1 m (aus 50 cm
   gemittelt; 50 cm nur, wenn Performance reicht), Textur/Splat 1 m (Ortho bis 20 cm im Nahbereich optional).
