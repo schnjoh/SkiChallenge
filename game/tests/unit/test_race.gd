@@ -95,3 +95,33 @@ func test_validation_bot_passes() -> void:
 	var v: TrackValidation = TrackValidation.new(_track, a, b)
 	v.evaluate()
 	assert_true(v.passed(), v.report_text())
+
+
+func test_training_start_mid_course_no_dsq() -> void:
+	var td: TrackData = _straight_track()
+	var gs: GateSet = _gates(td, [100.0, 300.0, 700.0])
+	var timer: RaceTimer = RaceTimer.new(td, gs)
+	timer.start_at(400.0, 0.0)
+	assert_eq(timer.next_gate, 2, "gates before the restart point are skipped")
+	assert_eq(timer.split_times.size(), 0, "split at 500 m still ahead")
+	var t: float = 0.0
+	var p: Vector3 = Vector3(0, 0, -400)
+	while t < 40.0 and timer.state == RaceTimer.State.RUNNING:
+		var p1: Vector3 = p + Vector3(0, 0, -20.0 / 120.0)
+		timer.update(p, p1, t, t + 1.0 / 120.0)
+		p = p1
+		t += 1.0 / 120.0
+	assert_eq(timer.state, RaceTimer.State.FINISHED, timer.dsq_reason)
+	assert_almost_eq(timer.finish_time, 30.0, 0.02)
+
+
+func test_abort_stops_timing() -> void:
+	var td: TrackData = _straight_track()
+	var gs: GateSet = _gates(td, [100.0])
+	var timer: RaceTimer = RaceTimer.new(td, gs)
+	timer.start_at(10.0, 0.0)
+	timer.abort()
+	timer.update(Vector3(0, 0, -10), Vector3(0, 0, -999.9), 0.0, 1.0)
+	timer.update(Vector3(0, 0, -999.9), Vector3(0, 0, -1001), 1.0, 1.1)
+	assert_eq(timer.state, RaceTimer.State.ABORTED)
+	assert_eq(timer.finish_time, -1.0)

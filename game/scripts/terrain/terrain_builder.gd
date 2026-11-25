@@ -8,6 +8,25 @@ const SLOTS: Array[String] = ["snow", "piste", "forest", "rock"]
 const FALLBACK_COLORS: Array[Color] = [
 	Color(0.93, 0.95, 1.0), Color(0.86, 0.9, 0.97), Color(0.55, 0.58, 0.55), Color(0.5, 0.49, 0.47)]
 const UV_SCALES: Array[float] = [0.08, 0.12, 0.1, 0.06]
+const GLITTER_ANCHOR: String = "	SPECULAR = specular;\n"
+const GLITTER_UNIFORMS: String = """uniform float snow_glint_density = 7.0;
+uniform float snow_glint_strength = 2.2;
+uniform float snow_glint_range = 70.0;
+
+void fragment()"""
+const GLITTER_CODE: String = """	// --- snow glitter (Schussfahrt) ---
+	{
+		vec3 sg_view = normalize(v_camera_pos - v_vertex);
+		float sg_dist = length(v_camera_pos - v_vertex);
+		vec2 sg_cell = floor(v_vertex.xz * snow_glint_density);
+		float sg_h = fract(sin(dot(sg_cell, vec2(12.9898, 78.233))) * 43758.5453);
+		vec3 sg_facet = normalize(vec3(fract(sg_h * 7.13) - 0.5, 1.2, fract(sg_h * 3.71) - 0.5));
+		vec3 sg_half = normalize(normalize(_light_direction) + sg_view);
+		float sg = step(0.97, sg_h) * smoothstep(0.985, 1.0, dot(sg_facet, sg_half));
+		sg *= (1.0 - smoothstep(snow_glint_range * 0.5, snow_glint_range, sg_dist)) * terrain_facing_light;
+		EMISSION = vec3(sg * snow_glint_strength);
+	}
+"""
 
 
 static func build(track: TrackData, parent: Node, region_size: int = 1024) -> Terrain3D:
@@ -38,7 +57,26 @@ static func build(track: TrackData, parent: Node, region_size: int = 1024) -> Te
 	t.data.import_images([height, control, color],
 			Vector3(float(core["world_min_x"]), 0.0, float(core["world_min_z"])), 0.0, 1.0)
 	t.data.calc_height_range(true)
+	add_snow_glitter(t.material)
 	return t
+
+
+## Snow glitter (phase 6): Terrain3D generates its shader at runtime; we take that code as an
+## override and add sparkling ice crystals (world-space hash, view/light dependent, near camera).
+## Falls back to the stock shader if the injection anchor is not found (future Terrain3D versions).
+static func add_snow_glitter(m: Terrain3DMaterial) -> bool:
+	m.shader_override_enabled = true
+	var base: Shader = m.shader_override
+	if base == null or not base.code.contains(GLITTER_ANCHOR):
+		m.shader_override_enabled = false
+		push_warning("TerrainBuilder: snow glitter anchor not found, using the stock terrain shader")
+		return false
+	var code: String = base.code.replace(GLITTER_ANCHOR, GLITTER_ANCHOR + GLITTER_CODE)
+	code = code.replace("void fragment()", GLITTER_UNIFORMS)  # uniforms right before fragment()
+	var sh: Shader = Shader.new()
+	sh.code = code
+	m.shader_override = sh
+	return true
 
 
 static func _set_alpha(img: Image, a: float) -> void:

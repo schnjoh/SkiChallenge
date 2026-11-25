@@ -8,7 +8,7 @@ signal split(index: int, time: float)
 signal finished(time: float)
 signal disqualified(reason: String)
 
-enum State { READY, RUNNING, FINISHED, DSQ }
+enum State { READY, RUNNING, FINISHED, DSQ, ABORTED }
 
 const MISS_TOLERANCE_M: float = 25.0  ## s past a gate without passing it -> DSQ
 
@@ -38,6 +38,25 @@ func reset() -> void:
 	finish_time = -1.0
 	dsq_reason = ""
 	s_now = 0.0
+
+
+## Training: timing starts at centre-line s (time t); earlier gates are skipped, earlier
+## splits are marked as not taken (-1) and are not shown.
+func start_at(s: float, t: float) -> void:
+	reset()
+	s_now = s
+	start_time = t
+	state = State.RUNNING
+	while next_gate < gates.gates.size() and float(gates.gates[next_gate]["s"]) < s:
+		next_gate += 1
+	while split_times.size() < gates.splits.size() and float(gates.splits[split_times.size()]["s"]) <= s:
+		split_times.append(-1.0)
+
+
+## Stops timing for good (crash): no later finish, split or DSQ.
+func abort() -> void:
+	if state == State.RUNNING or state == State.READY:
+		state = State.ABORTED
 
 
 func is_running() -> bool:

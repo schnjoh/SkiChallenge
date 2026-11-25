@@ -52,8 +52,7 @@ func evaluate() -> void:
 	_check("Zeit", r.finished and r.time >= tmin and r.time <= tmax, RaceTimer.format_time(r.time),
 			"%s–%s (1:50–2:00 × %.3f)" % [RaceTimer.format_time(tmin), RaceTimer.format_time(tmax), scale])
 	var avg: float = float(track.stats.get("length_3d_m", track.length())) / r.time * 3.6 if r.time > 0.0 else 0.0
-	_check("Ø-Tempo (3D-Länge)", avg >= AVG_KMH.x * 0.97 and avg <= AVG_KMH.y * 1.03, "%.1f km/h" % avg,
-			"101–107 km/h (±3 %)")
+	_check("Ø-Tempo (3D-Länge)", avg >= AVG_KMH.x and avg <= AVG_KMH.y, "%.1f km/h" % avg, "101–107 km/h")
 	_check("Netz-/Baumkontakte", r.net_contacts == 0, "%d" % r.net_contacts, "0")
 	_check("Höchsttempo", r.vmax_kmh <= VMAX_KMH, "%.1f km/h" % r.vmax_kmh, "≤ 153 km/h")
 	_check("Spitzen-g (Boden)", r.gmax <= GMAX, "%.2f g bei s=%.0f" % [r.gmax, r.gmax_s], "≤ 3,8 g")

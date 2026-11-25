@@ -92,7 +92,7 @@ func _set_visible(on: bool) -> void:
 func toggle() -> void:
 	active = not active
 	_set_visible(active)
-	game.rider.frozen = active or game.state == Game.State.COUNTDOWN
+	game.update_frozen()
 	if active:
 		_cam_to_rider()
 		free_cam.make_current()
@@ -294,7 +294,8 @@ func _end_drag() -> void:
 	if _drag_gate >= 0:
 		game.gates.finalize(game.world.track)
 		game.course.rebuild_gates()
-		_status.text = "Tor verschoben (nicht gespeichert)"
+		game.restart_run()  # gate indices changed: the running timer would be inconsistent
+		_status.text = "Tor verschoben, Lauf neu gestartet (nicht gespeichert)"
 	elif _drag_point >= 0:
 		_status.text = "Rennlinie geändert (nicht gespeichert)"
 		if game.bot:
@@ -323,6 +324,7 @@ func _regen_gates() -> void:
 	game.gates.gates = gs.gates
 	game.gates.finalize(track)
 	game.course.rebuild_gates()
+	game.restart_run()
 	rebuild_overlay()
 	_status.text = "%d Tore neu erzeugt (nicht gespeichert)" % gs.gates.size()
 

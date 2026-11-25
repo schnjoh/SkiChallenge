@@ -7,6 +7,7 @@ const BOT_LATERAL_ACC: float = 16.0  ## m/s², curvature speed cap
 const BOT_DECEL: float = 4.0  ## m/s², assumed braking for the backwards pass
 const JUMP_APPROACH_M: float = 60.0
 const JUMP_SPEED_MARGIN_KMH: float = 3.0
+const USE_PREJUMP: bool = true  ## pop 0.25-0.3 s before the lips from jumps.json (DESIGN §4.7)
 
 var path: TrackPath
 var lookahead_time: float = 0.55  ## s of travel ahead for the pursuit point
@@ -15,9 +16,9 @@ var lookahead_max: float = 45.0
 var steer_gain: float = 2.2  ## steer per radian of heading error
 var speed_limits: Array[Dictionary] = []  ## [{s0, s1, kmh}] brake above these speeds
 var prejump_at: PackedFloat32Array = PackedFloat32Array()  ## s positions to pop before
-var prejump_lead_s: float = 0.25
+var prejump_lead_s: float = 0.3
 var speed_cap: PackedFloat32Array = PackedFloat32Array()  ## m/s per path point (curvature limit)
-var s: float = 0.0
+var s: float = -1.0
 var _jump_idx: int = 0
 
 
@@ -33,11 +34,14 @@ static func for_track(track: TrackData) -> BotDriver:
 		var lip: float = b.path.project(track.point_at(float(j["s_lip"])))
 		b.speed_limits.append({"s0": lip - JUMP_APPROACH_M, "s1": lip + 2.0,
 				"kmh": float(j["v_kmh"]) + JUMP_SPEED_MARGIN_KMH})
+		if USE_PREJUMP:
+			b.prejump_at.append(lip)
 	return b
 
 
+## s = -1: the next drive() projects globally (after a restart anywhere on the course).
 func reset() -> void:
-	s = 0.0
+	s = -1.0
 	_jump_idx = 0
 
 
@@ -64,7 +68,7 @@ func limit_at(p_s: float) -> float:
 
 
 func drive(phys: SkiPhysics) -> SkiInput:
-	s = path.project(phys.pos, s)
+	s = path.project(phys.pos, s)  # hint -1 -> global search
 	var v: float = phys.speed()
 	var look: float = clampf(v * lookahead_time, lookahead_min, lookahead_max)
 	var target: Vector3 = path.point_at(s + look)

@@ -34,6 +34,8 @@ var leaderboard: Leaderboard
 var best_ghost: Ghost
 var run_record: Ghost = Ghost.new()
 var ghost_visual: RiderVisual
+var trail: SkiTrail
+var spectators: Spectators
 var _ghost_proxy: SkiPhysics
 var _countdown: float = 0.0
 var _replay_t: float = 0.0
@@ -69,6 +71,12 @@ func _ready() -> void:
 	rider.barriers = barriers
 	rider.setup(track.height_field, track.start_point(), SkiPhysics.dir_to_yaw(track.direction_at(0.0)), tuning)
 	rider.stepped.connect(_on_rider_stepped)
+	trail = SkiTrail.new()
+	trail.rider = rider
+	add_child(trail)
+	spectators = Spectators.new()
+	add_child(spectators)
+	spectators.build(track, gates.finish_s)
 	rider.crashed.connect(_on_crash)
 
 	cam = ChaseCamera.new()
@@ -121,32 +129,41 @@ func _section_names() -> PackedStringArray:
 func restart_run() -> void:
 	var track: TrackData = world.track
 	timer.reset()
-	run_record.clear()
+	run_record = Ghost.new()
+	trail.clear()
+	spectators.set_cheer(0.0)
 	_last_rank = 0
 	rider.controls_enabled = true
 	if mode == Session.Mode.TRAINING and _section_idx > 0:
 		var s: float = float(track.sections[_section_idx]["s"]) - 15.0
 		var p: Vector3 = track.race_path().point_at(track.race_path().project(track.point_at(s)))
 		rider.restart(p, SkiPhysics.dir_to_yaw(track.direction_at(s)), TRAINING_START_KMH / 3.6)
-		timer.s_now = s
+		timer.start_at(s, rider.physics.time)
 	else:
 		rider.restart()
+	if bot:
+		bot.reset()
 	cam.snap()
 	hud.hide_split()
 	if mode == Session.Mode.TRAINING:
 		state = State.RUNNING
-		rider.frozen = false
 		hud.set_mode("TRAINING · %s · Q/E Abschnitt" % track.sections[_section_idx]["name"])
 		hud.show_message("", "")
 	else:
 		state = State.COUNTDOWN
 		_countdown = COUNTDOWN_S
-		rider.frozen = true
 		hud.set_mode("RENNEN" + ("   ·   Bestzeit %s" % RaceTimer.format_time(leaderboard.best_time(TRACK_ID))
 				if leaderboard.best_time(TRACK_ID) > 0.0 else ""))
 	hud.show_hint("←/→ lenken · ↓/Leertaste Hocke · ↑ bremsen · Strg Vorspringen · R Neustart · C Kamera · Esc Pause")
 	if ghost_visual:
 		ghost_visual.visible = false
+	update_frozen()
+
+
+## The rider only simulates while racing/training and not in the F2 editor, countdown or replay.
+func update_frozen() -> void:
+	var editing: bool = track_editor != null and track_editor.active
+	rider.frozen = editing or state == State.COUNTDOWN or state == State.REPLAY
 
 
 ## Lets the validation bot drive (demo / screenshots).
@@ -156,9 +173,9 @@ func enable_bot() -> void:
 
 
 func _unhandled_input(event: InputEvent) -> void:
+	if track_editor.active:
+		return  # editor keys (Q/E fly, ...) must not restart or switch sections
 	if event.is_action_pressed("restart") and state != State.REPLAY:
-		if bot:
-			bot.reset()
 		restart_run()
 	elif event.is_action_pressed("replay") and state == State.DONE and run_record.size() > 2:
 		_start_replay()
@@ -178,12 +195,13 @@ func _process(dt: float) -> void:
 	var p: SkiPhysics = rider.physics
 	match state:
 		State.COUNTDOWN:
-			_countdown -= dt
+			if not track_editor.active:
+				_countdown -= dt
 			var n: int = ceili(_countdown)
 			hud.show_message(str(n) if n > 0 else "", "Bereit?" if n == 3 else "")
 			if _countdown <= 0.0:
 				state = State.RUNNING
-				rider.frozen = false
+				update_frozen()
 				hud.show_message("LOS!", "", 0.8)
 		State.REPLAY:
 			_replay_t += dt
@@ -212,16 +230,19 @@ func _on_rider_stepped(_input: SkiInput, prev_pos: Vector3) -> void:
 	var t1: float = rider.physics.time
 	var t0: float = t1 - 1.0 / float(Engine.physics_ticks_per_second)
 	timer.update(prev_pos, rider.physics.pos, t0, t1)
-	if timer.is_running() or state == State.RUNNING:
-		run_record.record(timer.race_time if timer.is_running() else t1, rider.physics)
+	if timer.is_running():
+		run_record.record(timer.race_time, rider.physics)
 
 
 func _on_split(index: int, t: float) -> void:
-	var has_best: bool = best_ghost != null and index < best_ghost.splits.size()
+	var has_best: bool = best_ghost != null and index < best_ghost.splits.size() and best_ghost.splits[index] >= 0.0 \
+			and mode == Session.Mode.RACE
 	hud.show_split(index, t, t - best_ghost.splits[index] if has_best else 0.0, has_best)
 
 
 func _on_finish(t: float) -> void:
+	if state != State.RUNNING:
+		return
 	state = State.DONE
 	rider.controls_enabled = false
 	run_record.final_time = t
@@ -233,8 +254,7 @@ func _on_finish(t: float) -> void:
 		leaderboard.save()
 		if best < 0.0 or t < best:
 			run_record.save(GHOST_PATH)
-			best_ghost = run_record
-			run_record = Ghost.new()
+			best_ghost = run_record  # restart_run() starts a fresh recording, the replay still works
 			if ghost_visual == null and bool(Session.get_setting("ghost")):
 				ghost_visual = RiderVisual.new(true)
 				add_child(ghost_visual)
@@ -245,10 +265,13 @@ func _on_finish(t: float) -> void:
 			sub += "   ·   Platz %d" % _last_rank
 	hud.show_message("ZIEL  %s" % RaceTimer.format_time(t), sub + "\nR Neustart · Enter Wiederholung · Esc Menü")
 	audio.cheer()
+	spectators.set_cheer(1.0)
 	run_finished.emit(t, _last_rank)
 
 
 func _on_dsq(reason: String) -> void:
+	if state != State.RUNNING:
+		return
 	state = State.DONE
 	hud.show_message("DISQUALIFIZIERT", reason + "\nR Neustart · Enter Wiederholung · Esc Menü")
 
@@ -257,12 +280,13 @@ func _on_crash(reason: String) -> void:
 	if state == State.DONE:
 		return
 	state = State.DONE
+	timer.abort()
 	hud.show_message("STURZ", reason + "\nR Neustart · Enter Wiederholung · Esc Menü")
 
 
 func _start_replay() -> void:
 	state = State.REPLAY
-	rider.frozen = true
+	update_frozen()
 	_replay_t = 0.0
 	hud.show_message("", "")
 	hud.set_mode("WIEDERHOLUNG · Enter beenden")

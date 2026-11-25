@@ -13,7 +13,7 @@ extends Resource
 @export_range(0.0, 12.0, 0.1, "suffix:m/s") var start_speed: float = 6.0  ## skating out of the start gate
 
 @export_group("Schnee & Reibung")
-@export_range(0.0, 0.2, 0.001) var mu_glide: float = 0.03
+@export_range(0.0, 0.2, 0.001) var mu_glide: float = 0.022
 @export_range(0.0, 1.5, 0.01) var mu_drift: float = 0.45
 @export_range(0.0, 2.0, 0.01) var mu_brake: float = 0.35
 
@@ -52,6 +52,7 @@ extends Resource
 @export_range(2.0, 30.0, 0.5, "suffix:m/s") var net_crash_speed: float = 11.0  ## into a net/tree
 @export_range(0.0, 1.0, 0.05) var net_restitution: float = 0.2
 @export_range(0.0, 0.8, 0.01) var net_speed_loss: float = 0.15  ## fraction of speed lost per net contact
+@export_range(0.0, 1.0, 0.05) var net_crash_keep: float = 0.4  ## speed fraction kept when crashing into a net
 @export_range(0.01, 0.5, 0.01, "suffix:s") var g_filter_tau: float = 0.08  ## smoothing of the g-load
 
 

@@ -139,7 +139,7 @@ func _bounce(phys: SkiPhysics, nrm2: Vector2, t: SkiTuning, what: String) -> voi
 		return
 	if -vn > t.net_crash_speed:
 		phys.vel -= n * vn * (1.0 + t.net_restitution)
-		phys.vel *= 0.4
+		phys.vel *= t.net_crash_keep
 		phys.force_crash("Sturz ins %s (%.0f km/h)" % [what, -vn * 3.6] if what == "Netz" else "Baum getroffen")
 		return
 	phys.vel -= n * vn * (1.0 + t.net_restitution)
