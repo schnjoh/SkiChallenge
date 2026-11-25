@@ -13,6 +13,8 @@ var gates: GateSet
 var bot: BotDriver
 var phys: SkiPhysics
 var timer: RaceTimer
+var barriers: CourseBarriers
+var net_contacts: int = 0
 
 # results
 var time: float = -1.0
@@ -42,6 +44,8 @@ func run() -> BotRun:
 	phys = SkiPhysics.new(tuning, track.height_field)
 	phys.reset(track.start_point(), SkiPhysics.dir_to_yaw(track.direction_at(0.0)), tuning.start_speed)
 	timer = RaceTimer.new(track, gates)
+	if barriers == null:
+		barriers = CourseBarriers.build(track)
 	var air_s0: float = 0.0
 	var air_v0: float = 0.0
 	var air_p0: Vector3 = Vector3.ZERO
@@ -53,6 +57,8 @@ func run() -> BotRun:
 		var p0: Vector3 = phys.pos
 		var t0: float = phys.time
 		phys.step(bot.drive(phys), DT)
+		if barriers.resolve(phys, p0) != "":
+			net_contacts += 1
 		timer.update(p0, phys.pos, t0, phys.time)
 		var kmh: float = phys.speed_kmh()
 		var cs: float = timer.s_now

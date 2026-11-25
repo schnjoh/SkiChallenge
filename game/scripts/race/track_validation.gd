@@ -54,6 +54,7 @@ func evaluate() -> void:
 	var avg: float = float(track.stats.get("length_3d_m", track.length())) / r.time * 3.6 if r.time > 0.0 else 0.0
 	_check("Ø-Tempo (3D-Länge)", avg >= AVG_KMH.x * 0.97 and avg <= AVG_KMH.y * 1.03, "%.1f km/h" % avg,
 			"101–107 km/h (±3 %)")
+	_check("Netz-/Baumkontakte", r.net_contacts == 0, "%d" % r.net_contacts, "0")
 	_check("Höchsttempo", r.vmax_kmh <= VMAX_KMH, "%.1f km/h" % r.vmax_kmh, "≤ 153 km/h")
 	_check("Spitzen-g (Boden)", r.gmax <= GMAX, "%.2f g bei s=%.0f" % [r.gmax, r.gmax_s], "≤ 3,8 g")
 	_check("100 km/h nach dem Start", r.t_100kmh >= T100_S.x and r.t_100kmh <= T100_S.y,

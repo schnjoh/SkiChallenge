@@ -9,6 +9,7 @@ signal built
 @export var build_on_ready: bool = true
 @export var shadows: bool = true
 @export var rings: bool = true
+@export_range(0.3, 1.0) var view_distance: float = 1.0  ## scales fog, tree LOD and far-ring detail
 
 var track: TrackData
 var terrain: Terrain3D
@@ -32,7 +33,7 @@ func build() -> void:
 	terrain = TerrainBuilder.build(track, self)
 	terrain.set_clipmap_target(self)  # until a camera is assigned (avoids Terrain3D camera errors)
 	if tree_density > 0.0:
-		tree_count = TerrainBuilder.add_trees(terrain, track, tree_density)
+		tree_count = TerrainBuilder.add_trees(terrain, track, tree_density, view_distance)
 	if rings:
 		RingTerrain.build(track, self, "far", track.meta["core"], 256, [2, 8] as Array[int], [2500.0] as Array[float])
 		RingTerrain.build(track, self, "horizon", track.meta["far"], 116, [1] as Array[int], [] as Array[float])
@@ -64,7 +65,7 @@ func _build_environment() -> void:
 	environment.tonemap_exposure = 0.9
 	environment.fog_enabled = true
 	environment.fog_mode = Environment.FOG_MODE_EXPONENTIAL
-	environment.fog_density = 0.00011
+	environment.fog_density = 0.00011 / clampf(view_distance, 0.3, 1.0)
 	environment.fog_light_color = Color(0.78, 0.84, 0.93)
 	environment.fog_aerial_perspective = 0.6
 	environment.fog_sky_affect = 0.15

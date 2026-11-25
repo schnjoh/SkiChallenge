@@ -25,6 +25,8 @@ func _ready() -> void:
 		game.cam.toggle_mode()
 	if OS.get_environment("SHOT_F1") == "1":
 		game.tuning_menu.toggle()
+	if OS.get_environment("SHOT_F2") == "1":
+		game.track_editor.toggle()
 
 
 func _process(_dt: float) -> void:

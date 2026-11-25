@@ -43,8 +43,19 @@ static func load_track(track_dir: String = DEFAULT_DIR) -> TrackData:
 	for j: Variant in jj.get("jumps", []):
 		td.jumps.append(j as Dictionary)
 	td.stats = _read_json(track_dir.path_join("line_stats.json"))
-	td.racing_line = RacingLine.load_points(track_dir.path_join(RacingLine.FILE))
+	td.racing_line = RacingLine.load_points(td.editable_path(RacingLine.FILE))
 	return td
+
+
+## user:// directory for edited track files in exported builds (res:// is read-only there).
+func override_dir() -> String:
+	return "user://tracks".path_join(dir.trim_suffix("/").get_file())
+
+
+## Path of an editable file: the user override if it exists, else the shipped one.
+func editable_path(file: String) -> String:
+	var o: String = override_dir().path_join(file)
+	return o if FileAccess.file_exists(o) else dir.path_join(file)
 
 
 ## Path the rider should follow: racing line if present, else the OSM centre line.

@@ -174,6 +174,8 @@ func step(input: SkiInput, dt: float) -> void:
 			phase = Phase.AIR
 			air_time = 0.0
 	pos = p_new
+	if not surface.contains(pos.x, pos.z):
+		_crash("Gelände verlassen")
 	if phase == Phase.AIR:
 		air_time += dt
 		max_air_time = maxf(max_air_time, air_time)
@@ -275,6 +277,11 @@ func _on_landing(impact_vn: float, n: Vector3) -> void:
 		ang = minf(ang, 180.0 - ang)  # landing backwards counts like forwards (skis are symmetric)
 		if ang > tuning.landing_crash_yaw:
 			_crash("Verkantet gelandet (%.0f°)" % ang)
+
+
+## External crash (nets, trees, leaving the terrain).
+func force_crash(reason: String) -> void:
+	_crash(reason)
 
 
 func _crash(reason: String) -> void:

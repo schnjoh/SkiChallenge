@@ -92,6 +92,8 @@ func _build() -> void:
 	list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	scroll.add_child(list)
 	for p: Dictionary in tuning.get_property_list():
+		if p["usage"] & PROPERTY_USAGE_CATEGORY:
+			continue
 		if p["usage"] & PROPERTY_USAGE_GROUP:
 			var g: Label = Label.new()
 			g.text = str(p["name"])

@@ -102,7 +102,7 @@ static func load_file(path: String, track: TrackData) -> GateSet:
 
 ## Gates for a track: gates.json if present, otherwise generated from the racing line.
 static func for_track(track: TrackData) -> GateSet:
-	var gs: GateSet = load_file(track.dir.path_join(FILE), track)
+	var gs: GateSet = load_file(track.editable_path(FILE), track)
 	return gs if gs != null else generate(track)
 
 

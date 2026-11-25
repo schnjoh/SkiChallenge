@@ -12,6 +12,9 @@ const ACTIONS: Dictionary = {
 	"debug_tuning": [KEY_F1],
 	"debug_track": [KEY_F2],
 	"pause": [KEY_ESCAPE],
+	"section_prev": [KEY_PAGEUP, KEY_Q],
+	"section_next": [KEY_PAGEDOWN, KEY_E],
+	"replay": [KEY_ENTER, KEY_KP_ENTER],
 }
 const PAD_BUTTONS: Dictionary = {
 	"tuck": [JOY_BUTTON_A],
@@ -20,6 +23,9 @@ const PAD_BUTTONS: Dictionary = {
 	"restart": [JOY_BUTTON_Y],
 	"camera_toggle": [JOY_BUTTON_BACK],
 	"pause": [JOY_BUTTON_START],
+	"section_prev": [JOY_BUTTON_LEFT_SHOULDER],
+	"section_next": [JOY_BUTTON_RIGHT_SHOULDER],
+	"replay": [JOY_BUTTON_GUIDE],
 }
 const PAD_AXES: Dictionary = {
 	"steer_left": [JOY_AXIS_LEFT_X, -1.0],

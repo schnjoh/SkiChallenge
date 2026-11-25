@@ -9,6 +9,8 @@ signal stepped(input: SkiInput, prev_pos: Vector3)  ## after every physics step
 
 var tuning: SkiTuning
 var physics: SkiPhysics
+var barriers: CourseBarriers  ## optional: nets and trees
+var last_contact: String = ""
 var visual: RiderVisual
 var autopilot: Callable = Callable()  ## optional: func(physics) -> SkiInput (bot / demo)
 var controls_enabled: bool = true
@@ -54,7 +56,7 @@ func _physics_process(dt: float) -> void:
 	var input: SkiInput
 	if autopilot.is_valid():
 		input = autopilot.call(physics)
-	elif controls_enabled:
+	elif controls_enabled and not get_viewport().gui_get_focus_owner() is LineEdit:
 		input = GameInput.read(_prejump_latch)
 	else:
 		input = SkiInput.make(0.0, false, true)
@@ -62,11 +64,26 @@ func _physics_process(dt: float) -> void:
 	last_input = input
 	_prev_pos = physics.pos
 	physics.step(input, dt)
+	if barriers:
+		last_contact = barriers.resolve(physics, _prev_pos)
 	_cur_pos = physics.pos
 	stepped.emit(input, _prev_pos)
 	if physics.is_crashed() and not _was_crashed:
 		_was_crashed = true
 		crashed.emit(physics.crash_reason)
+
+
+## Shows an externally given state (replay). Physics must be frozen.
+func display_state(proxy: SkiPhysics) -> void:
+	physics.pos = proxy.pos
+	physics.vel = proxy.vel
+	physics.yaw = proxy.yaw
+	physics.tuck_amount = proxy.tuck_amount
+	physics.edge_angle = proxy.edge_angle
+	physics.phase = proxy.phase
+	physics.surface_normal = proxy.surface_normal
+	_prev_pos = proxy.pos
+	_cur_pos = proxy.pos
 
 
 func _process(dt: float) -> void:

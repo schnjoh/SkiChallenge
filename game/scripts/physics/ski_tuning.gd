@@ -49,6 +49,9 @@ extends Resource
 @export_range(0.1, 1.5, 0.05) var crash_friction: float = 0.6
 @export_range(0.0, 10.0, 0.1, "suffix:rad/s") var crash_spin_rate: float = 2.0
 @export_range(0.0, 10.0, 0.1, "suffix:m/s") var landing_check_min_speed: float = 3.0
+@export_range(2.0, 30.0, 0.5, "suffix:m/s") var net_crash_speed: float = 11.0  ## into a net/tree
+@export_range(0.0, 1.0, 0.05) var net_restitution: float = 0.2
+@export_range(0.0, 0.8, 0.01) var net_speed_loss: float = 0.15  ## fraction of speed lost per net contact
 @export_range(0.01, 0.5, 0.01, "suffix:s") var g_filter_tau: float = 0.08  ## smoothing of the g-load
 
 

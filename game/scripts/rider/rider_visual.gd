@@ -29,10 +29,12 @@ var _lean: float = 0.0
 var _crash_t: float = 0.0
 var _crash_spin: Vector3 = Vector3.ZERO
 var _mats: Dictionary = {}
+var ghost: bool = false  ## translucent ghost rider (best run)
 
 
-func _init() -> void:
-	name = "RiderVisual"
+func _init(p_ghost: bool = false) -> void:
+	ghost = p_ghost
+	name = "GhostVisual" if ghost else "RiderVisual"
 	body = Node3D.new()
 	add_child(body)
 	for side: float in [-1.0, 1.0]:
@@ -81,6 +83,10 @@ func _mat(c: Color) -> StandardMaterial3D:
 	var m: StandardMaterial3D = StandardMaterial3D.new()
 	m.albedo_color = c
 	m.roughness = 0.55
+	if ghost:
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.albedo_color = Color(c.lerp(Color(0.6, 0.8, 1.0), 0.6), 0.38)
+		m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	_mats[key] = m
 	return m
 
