@@ -130,6 +130,9 @@ def main() -> None:
     height = (dgm * (1.0 - wgt) + target * wgt + config.SNOW_DEPTH_M).astype(np.float32)
 
     out = config.OUT
+    # unshaped snow surface + nearest line index: input of process_shaping (jumps.json)
+    np.save(DERIVED / "height_base.npy", height)
+    np.save(DERIVED / "near_idx.npy", near.astype(np.int32))
     write_r32(out / "height.r32", height)
     print(f"[terrain] height.r32 {height.shape} {height.min():.1f}..{height.max():.1f} m")
 

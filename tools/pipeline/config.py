@@ -74,3 +74,22 @@ FINISH_RUNOUT_M = 120.0  # corridor/piste continues past the finish line (finish
 
 # Terrain3D texture slots (control map base/overlay ids)
 TEX_SNOW, TEX_PISTE, TEX_FOREST, TEX_ROCK = 0, 1, 2, 3
+
+# --- Piste shaping (defaults for game/data/streif/jumps.json; the JSON file wins once it exists) ---
+# Design speeds per section for grooming (research §6 section speeds, km/h).
+SHAPING_GROOM_SPEEDS_KMH = {
+    "Start": 100.0, "Mausefalle": 120.0, "Kompression": 120.0, "Karussell": 100.0, "Steilhang": 110.0,
+    "Brückenschuss": 110.0, "Gschöss": 105.0, "Alte Schneise": 125.0, "Seidlalmsprung": 90.0,
+    "Lärchenschuss": 115.0, "Oberhausberg": 100.0, "Hausbergkante": 110.0, "Traverse": 120.0,
+    "Zielhang": 140.0, "Zielsprung": 140.0,
+}
+# Modelled jumps: lip position s (m along line.json), design take-off speed, target length.
+SHAPING_JUMPS = [
+    {"name": "Mausefalle", "s_lip": 136.0, "v_kmh": 100.0, "length_m": 45.0, "impact_deg": 6.0, "runout_g": 3.0},
+    {"name": "Seidlalmsprung", "s_lip": 1546.0, "v_kmh": 80.0, "length_m": 32.0, "impact_deg": 6.0, "runout_g": 3.0},
+    {"name": "Hausbergkante", "s_lip": 2412.0, "v_kmh": 95.0, "length_m": 32.0, "impact_deg": 6.0, "runout_g": 3.0},
+    {"name": "Zielsprung", "s_lip": 2876.0, "v_kmh": 130.0, "length_m": 50.0, "impact_deg": 5.0, "runout_g": 3.0},
+]
+SHAPING_CROSS_SIGMA_M = 15.0  # smoothing of the fitted piste cross profile along s
+SHAPING_FOLD_SIGMA_M = 4.0  # smoothing of the shaping offsets where the corridor mapping folds (tight turns)
+SHAPING_FOLD_BLEND_M = 10.0

@@ -5,7 +5,7 @@ extends RefCounted
 ## Each fixed step: integrate gravity + air drag ballistically, then resolve terrain contact.
 ## Penetration -> the velocity component into the surface is removed; that removal defines the
 ## normal acceleration N (and the g-load). No penetration -> no contact this step; after
-## `liftoff_steps` steps with a gap > `liftoff_clearance` the rider is airborne. Compressions,
+## `liftoff_time` seconds with a gap > `liftoff_clearance` the rider is airborne. Compressions,
 ## crests and landings therefore all follow from one mechanism. Snow forces (glide friction,
 ## edge grip, carving, drifting, braking) act only with contact and scale with N.
 ##
@@ -15,7 +15,6 @@ extends RefCounted
 enum Phase { GROUND, AIR, CRASHED }
 
 const G: float = 9.81
-const G_FILTER_TAU: float = 0.08  ## smoothing of the g-load (triangle facets cause spikes)
 
 var tuning: SkiTuning
 var surface: HeightField
@@ -39,7 +38,7 @@ var landings: int = 0
 var max_air_time: float = 0.0
 var surface_normal: Vector3 = Vector3.UP
 
-var _gap_steps: int = 0
+var _gap_time: float = 0.0
 var _overload_t: float = 0.0
 var _prejump_t: float = 0.0
 var _in_contact: bool = true
@@ -69,7 +68,7 @@ func reset(p: Vector3, heading_yaw: float, speed: float = 0.0) -> void:
 	crash_reason = ""
 	last_landing_drop = 0.0
 	landings = 0
-	_gap_steps = 0
+	_gap_time = 0.0
 	_overload_t = 0.0
 	_prejump_t = 0.0
 	_in_contact = true
@@ -136,6 +135,11 @@ func step(input: SkiInput, dt: float) -> void:
 	var acc: Vector3 = Vector3(0.0, -G, 0.0) - vel * (0.5 * tuning.air_density * cda * spd / tuning.mass)
 	vel += acc * dt
 	if phase == Phase.AIR:
+		# the rider steers the skis a little and keeps them along the flight path
+		var flat: Vector3 = Vector3(vel.x, 0.0, vel.z)
+		if flat.length() > tuning.landing_check_min_speed:
+			var err: float = wrapf(dir_to_yaw(flat) - yaw, -PI, PI)
+			yaw += err * clampf(tuning.air_align_rate * dt, 0.0, 1.0)
 		yaw += input.steer * tuning.air_yaw_rate * dt
 	var p_new: Vector3 = pos + vel * dt
 
@@ -152,7 +156,7 @@ func step(input: SkiInput, dt: float) -> void:
 			vel -= n * vn
 			normal_acc = -vn / dt
 		_in_contact = true
-		_gap_steps = 0
+		_gap_time = 0.0
 		if was_air:
 			_on_landing(-vn, n)
 		elif phase != Phase.CRASHED:
@@ -165,8 +169,8 @@ func step(input: SkiInput, dt: float) -> void:
 	else:
 		_in_contact = false
 		if p_new.y - h > tuning.liftoff_clearance:
-			_gap_steps += 1
-		if phase == Phase.GROUND and _gap_steps >= tuning.liftoff_steps:
+			_gap_time += dt
+		if phase == Phase.GROUND and _gap_time >= tuning.liftoff_time:
 			phase = Phase.AIR
 			air_time = 0.0
 	pos = p_new
@@ -178,15 +182,15 @@ func step(input: SkiInput, dt: float) -> void:
 	if _in_contact:
 		if phase == Phase.CRASHED:
 			_apply_friction(tuning.crash_friction * normal_acc * dt)
-			yaw += 2.0 * dt  # tumbling skis
+			yaw += tuning.crash_spin_rate * dt  # tumbling skis
 		else:
 			_ski_forces(input, n, dt)
 	else:
 		drifting = false
-		skid = move_toward(skid, 0.0, 4.0 * dt)
+		skid = move_toward(skid, 0.0, tuning.skid_fall_rate * dt)
 
 	# --- g-load & overload ---------------------------------------------------------------
-	var k: float = clampf(dt / G_FILTER_TAU, 0.0, 1.0)
+	var k: float = clampf(dt / tuning.g_filter_tau, 0.0, 1.0)
 	g_load = lerpf(g_load, normal_acc / G, k)
 	if phase == Phase.GROUND and g_load > tuning.overload_crash_g:
 		_overload_t += dt
@@ -201,7 +205,7 @@ func _ski_forces(input: SkiInput, n: Vector3, dt: float) -> void:
 	var f: Vector3 = _tangent(heading(), n)
 	var v_long: float = vel.dot(f)
 	var edge_abs: float = absf(edge_angle)
-	var engage: float = smoothstep(2.0, 15.0, edge_abs)
+	var engage: float = smoothstep(tuning.edge_engage_start, tuning.edge_engage_full, edge_abs)
 	var radius: float = tuning.sidecut_radius * cos(deg_to_rad(edge_abs))
 	var omega: float = signf(edge_angle) * engage * absf(v_long) / maxf(radius, 1.0)
 	# low-speed steering (stepping / pivoting) so the rider can always turn
@@ -217,7 +221,7 @@ func _ski_forces(input: SkiInput, n: Vector3, dt: float) -> void:
 	var v_t: float = v_tan.length()
 	var v_lat: float = v_tan.dot(right)
 	var sgn: float = 1.0 if v_tan.dot(f) >= 0.0 else -1.0
-	var grip: float = tuning.edge_grip * normal_acc * (0.35 if braking else 1.0)
+	var grip: float = tuning.edge_grip * normal_acc * (tuning.brake_grip_factor if braking else 1.0)
 	var need: float = absf(v_lat) / dt
 	if need <= grip:
 		# carving: velocity follows the ski without loss (rotation), small carve drag
@@ -225,7 +229,7 @@ func _ski_forces(input: SkiInput, n: Vector3, dt: float) -> void:
 		v_tan = f * sgn * v_t
 		_set_tangent(v_tan, n)
 		_apply_friction(tuning.carve_drag * engage * normal_acc * dt)
-		skid = move_toward(skid, 0.0, 4.0 * dt)
+		skid = move_toward(skid, 0.0, tuning.skid_fall_rate * dt)
 	else:
 		# drifting: lateral slip remains, snow pushes sideways and brakes
 		drifting = true
@@ -234,7 +238,7 @@ func _ski_forces(input: SkiInput, n: Vector3, dt: float) -> void:
 		_set_tangent(v_tan, n)
 		var slip: float = clampf(absf(v_lat) / maxf(v_t, 0.1), 0.0, 1.0)
 		_apply_friction(tuning.mu_drift * slip * normal_acc * dt)
-		skid = move_toward(skid, slip, 6.0 * dt)
+		skid = move_toward(skid, slip, tuning.skid_rise_rate * dt)
 	var mu: float = tuning.mu_glide + (tuning.mu_brake if braking else 0.0)
 	_apply_friction(mu * normal_acc * dt)
 
@@ -266,7 +270,7 @@ func _on_landing(impact_vn: float, n: Vector3) -> void:
 		_crash("Harte Landung (%.1f m)" % last_landing_drop)
 		return
 	var v_tan: Vector3 = vel - n * vel.dot(n)
-	if v_tan.length() > 3.0:
+	if v_tan.length() > tuning.landing_check_min_speed:
 		var ang: float = rad_to_deg(_tangent(heading(), n).angle_to(v_tan.normalized()))
 		ang = minf(ang, 180.0 - ang)  # landing backwards counts like forwards (skis are symmetric)
 		if ang > tuning.landing_crash_yaw:

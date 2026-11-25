@@ -26,14 +26,20 @@ extends Resource
 @export_range(0.0, 0.2, 0.005) var carve_drag: float = 0.02
 @export_range(0.1, 5.0, 0.05, "suffix:rad/s") var pivot_rate: float = 1.8
 @export_range(0.0, 3.0, 0.05, "suffix:rad/s") var min_steer_rate: float = 0.6
+@export_range(0.0, 20.0, 0.5, "suffix:°") var edge_engage_start: float = 2.0  ## carving starts
+@export_range(1.0, 40.0, 0.5, "suffix:°") var edge_engage_full: float = 15.0  ## carving fully engaged
+@export_range(0.05, 1.0, 0.01) var brake_grip_factor: float = 0.35  ## edge grip while braking/skidding
+@export_range(0.5, 20.0, 0.5, "suffix:1/s") var skid_rise_rate: float = 6.0  ## skid indicator dynamics
+@export_range(0.5, 20.0, 0.5, "suffix:1/s") var skid_fall_rate: float = 4.0
 
 @export_group("Sprung & Flug")
 @export_range(0.0, 6.0, 0.1, "suffix:m/s") var prejump_impulse: float = 2.2
 @export_range(0.1, 2.0, 0.05, "suffix:s") var prejump_cooldown: float = 0.8
 @export_range(0.0, 0.2, 0.005, "suffix:m") var liftoff_clearance: float = 0.03
-@export_range(1, 6, 1) var liftoff_steps: int = 2
+@export_range(0.0, 0.1, 0.001, "suffix:s") var liftoff_time: float = 0.016  ## gap must persist this long
 @export_range(0.0, 0.5, 0.01, "suffix:s") var min_air_time: float = 0.1
 @export_range(0.0, 3.0, 0.05, "suffix:rad/s") var air_yaw_rate: float = 0.7
+@export_range(0.0, 10.0, 0.1, "suffix:1/s") var air_align_rate: float = 2.5  ## skis follow the flight path
 
 @export_group("Sturz")
 @export_range(0.5, 8.0, 0.1, "suffix:m") var landing_crash_drop: float = 2.5
@@ -41,6 +47,9 @@ extends Resource
 @export_range(2.0, 10.0, 0.1, "suffix:g") var overload_crash_g: float = 4.5
 @export_range(0.05, 1.0, 0.01, "suffix:s") var overload_time: float = 0.25
 @export_range(0.1, 1.5, 0.05) var crash_friction: float = 0.6
+@export_range(0.0, 10.0, 0.1, "suffix:rad/s") var crash_spin_rate: float = 2.0
+@export_range(0.0, 10.0, 0.1, "suffix:m/s") var landing_check_min_speed: float = 3.0
+@export_range(0.01, 0.5, 0.01, "suffix:s") var g_filter_tau: float = 0.08  ## smoothing of the g-load
 
 
 ## All tunable property names (exported, numeric).

@@ -125,13 +125,26 @@ func test_hard_landing_crashes_soft_does_not() -> void:
 
 
 func test_crossways_landing_crashes() -> void:
-	var phys: SkiPhysics = SkiPhysics.new(SkiTuning.new(), _slope(0.0))
+	var t: SkiTuning = SkiTuning.new()
+	t.air_align_rate = 0.0  # rider does not correct the skis in the air
+	var phys: SkiPhysics = SkiPhysics.new(t, _slope(0.0))
 	phys.reset(Vector3.ZERO, 0.0, 15.0)
 	phys.yaw = PI / 2.0  # skis across the direction of travel
 	phys.pos.y = 0.5
 	phys.phase = SkiPhysics.Phase.AIR
 	_run(phys, SkiInput.make(0.0, true), 1.0)
 	assert_true(phys.is_crashed())
+
+
+func test_skis_realign_with_flight_path_in_long_flight() -> void:
+	var phys: SkiPhysics = SkiPhysics.new(SkiTuning.new(), _slope(0.0))
+	phys.reset(Vector3.ZERO, 0.0, 15.0)
+	phys.yaw = deg_to_rad(40.0)
+	phys.pos.y = 2.2  # ~0.67 s of flight, soft landing (2.2 m < landing_crash_drop)
+	phys.phase = SkiPhysics.Phase.AIR
+	_run(phys, SkiInput.make(0.0, true), 1.5)
+	assert_false(phys.is_crashed(), phys.crash_reason)
+	assert_almost_eq(wrapf(phys.yaw, -PI, PI), 0.0, deg_to_rad(12.0), "skis follow the flight path")
 
 
 ## Concave circular dip: g = v²/(R g) + 1 at the bottom.
@@ -184,11 +197,11 @@ func test_deterministic() -> void:
 func test_tuning_json_roundtrip() -> void:
 	var t: SkiTuning = SkiTuning.new()
 	t.mu_glide = 0.042
-	t.liftoff_steps = 3
+	t.air_align_rate = 3.5
 	var path: String = "user://test_tuning.json"
 	assert_eq(t.save_json(path), OK)
 	var u: SkiTuning = SkiTuning.load_json(path)
 	assert_almost_eq(u.mu_glide, 0.042, 1e-6)
-	assert_eq(u.liftoff_steps, 3)
+	assert_almost_eq(u.air_align_rate, 3.5, 1e-6)
 	assert_gt(t.tunable_properties().size(), 25)
 	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))

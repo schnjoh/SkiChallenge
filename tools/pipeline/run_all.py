@@ -14,13 +14,14 @@ import process_line
 import pack_textures
 import process_ortho
 import process_rings
+import process_shaping
 import process_splat
 import process_terrain
 import process_trees
 
 STEPS = [
     fetch_osm, process_line, fetch_terrain, fetch_ortho, fetch_osm_buildings,
-    process_terrain, process_buildings, process_ortho, process_trees, process_splat, process_rings,
+    process_terrain, process_shaping, process_buildings, process_ortho, process_trees, process_splat, process_rings,
     pack_textures, preview,
 ]
 

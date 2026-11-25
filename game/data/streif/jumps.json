@@ -1,0 +1,64 @@
+{
+ "note": "Editable piste shaping. s = horizontal distance along line.json (m). Re-run tools/pipeline/process_shaping.py (and godot --headless --import) after edits.",
+ "design": {
+  "mass_kg": 95.0,
+  "air_density": 1.05,
+  "cda_tuck_m2": 0.16,
+  "mu": 0.03
+ },
+ "groom": {
+  "crest_g": 1.35,
+  "comp_g": 2.6,
+  "speeds_kmh": {
+   "Start": 100.0,
+   "Mausefalle": 120.0,
+   "Kompression": 120.0,
+   "Karussell": 100.0,
+   "Steilhang": 110.0,
+   "Brückenschuss": 110.0,
+   "Gschöss": 105.0,
+   "Alte Schneise": 125.0,
+   "Seidlalmsprung": 90.0,
+   "Lärchenschuss": 115.0,
+   "Oberhausberg": 100.0,
+   "Hausbergkante": 110.0,
+   "Traverse": 120.0,
+   "Zielhang": 140.0,
+   "Zielsprung": 140.0
+  }
+ },
+ "jumps": [
+  {
+   "name": "Mausefalle",
+   "s_lip": 136.0,
+   "v_kmh": 100.0,
+   "length_m": 45.0,
+   "impact_deg": 6.0,
+   "runout_g": 3.0
+  },
+  {
+   "name": "Seidlalmsprung",
+   "s_lip": 1546.0,
+   "v_kmh": 80.0,
+   "length_m": 32.0,
+   "impact_deg": 6.0,
+   "runout_g": 3.0
+  },
+  {
+   "name": "Hausbergkante",
+   "s_lip": 2412.0,
+   "v_kmh": 95.0,
+   "length_m": 32.0,
+   "impact_deg": 6.0,
+   "runout_g": 3.0
+  },
+  {
+   "name": "Zielsprung",
+   "s_lip": 2876.0,
+   "v_kmh": 130.0,
+   "length_m": 50.0,
+   "impact_deg": 5.0,
+   "runout_g": 3.0
+  }
+ ]
+}

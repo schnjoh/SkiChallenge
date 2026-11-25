@@ -81,6 +81,13 @@ def main() -> int:
           f"3D length {st['length_3d_m']} (±5 % of {LENGTH_OFFICIAL})")
     check(24 <= st["mean_gradient_pct"] <= 30, f"mean gradient {st['mean_gradient_pct']} %")
     check(st["max_gradient_10m_pct"] >= 65, f"max gradient {st['max_gradient_10m_pct']} % (≥65)")
+    # piste shaping (process_shaping.py, jumps.json)
+    jumps = read_json(out / "jumps.json")["jumps"]
+    check(len(st.get("shaped", [])) == len(jumps) >= 4, f"{len(jumps)} modelled jumps baked in")
+    lo, hi = st.get("shaping_offset_range_m", [99, 99])
+    check(-8.0 <= lo <= 0.0 <= hi <= 8.0, f"shaping offsets {lo}..{hi} m (|dh| <= 8 m)")
+    check(st["max_gradient_10m_pct"] >= 80 and st["max_gradient_10m_at_s"] < 260,
+          f"Mausefalle steepness {st['max_gradient_10m_pct']} % at s={st['max_gradient_10m_at_s']} (>= 80 %)")
     secs = read_json(out / "sections.json")["sections"]
     check(len(secs) == 15 and all(a["s"] <= b["s"] for a, b in zip(secs, secs[1:])), "15 sections in order")
 

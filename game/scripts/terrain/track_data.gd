@@ -13,6 +13,8 @@ var height_field: HeightField
 var line_points: PackedVector3Array = PackedVector3Array()
 var line_s: PackedFloat32Array = PackedFloat32Array()
 var sections: Array[Dictionary] = []
+var jumps: Array[Dictionary] = []  ## jumps.json "jumps" (s_lip on the centre line, v_kmh, length_m)
+var racing_line: PackedVector3Array = PackedVector3Array()  ## racing_line.json (empty if missing)
 
 
 static func load_track(track_dir: String = DEFAULT_DIR) -> TrackData:
@@ -36,7 +38,16 @@ static func load_track(track_dir: String = DEFAULT_DIR) -> TrackData:
 	var sec: Dictionary = _read_json(track_dir.path_join("sections.json"))
 	for s: Variant in sec.get("sections", []):
 		td.sections.append(s as Dictionary)
+	var jj: Dictionary = _read_json(track_dir.path_join("jumps.json"))
+	for j: Variant in jj.get("jumps", []):
+		td.jumps.append(j as Dictionary)
+	td.racing_line = RacingLine.load_points(track_dir.path_join(RacingLine.FILE))
 	return td
+
+
+## Path the rider should follow: racing line if present, else the OSM centre line.
+func race_path() -> TrackPath:
+	return TrackPath.from_points(racing_line if racing_line.size() > 1 else line_points)
 
 
 static func _read_json(path: String) -> Dictionary:

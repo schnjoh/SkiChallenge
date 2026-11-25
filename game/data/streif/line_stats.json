@@ -1,12 +1,38 @@
 {
  "length_2d_m": 3059.8,
- "length_3d_m": 3220.0,
+ "length_3d_m": 3220.7,
  "start_alt_m": 1663.0,
  "finish_alt_m": 805.1,
  "drop_m": 857.9,
  "mean_gradient_pct": 28.0,
- "max_gradient_10m_pct": 77.2,
- "max_gradient_10m_at_s": 140.0,
- "max_gradient_50m_pct": 71.2,
- "max_gradient_50m_at_s": 138.0
+ "max_gradient_10m_pct": 91.5,
+ "max_gradient_10m_at_s": 178.0,
+ "max_gradient_50m_pct": 73.4,
+ "max_gradient_50m_at_s": 140.0,
+ "shaped": [
+  {
+   "name": "Mausefalle",
+   "s_lip": 138.0,
+   "s_end": 256.0
+  },
+  {
+   "name": "Seidlalmsprung",
+   "s_lip": 1547.9,
+   "s_end": 1607.9
+  },
+  {
+   "name": "Hausbergkante",
+   "s_lip": 2413.9,
+   "s_end": 2471.9
+  },
+  {
+   "name": "Zielsprung",
+   "s_lip": 2877.8,
+   "s_end": 2979.8
+  }
+ ],
+ "shaping_offset_range_m": [
+  -2.95,
+  4.12
+ ]
 }
