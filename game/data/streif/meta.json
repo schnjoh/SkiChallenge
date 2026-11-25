@@ -21,7 +21,20 @@
   "height": 2304,
   "res_m": 4.0,
   "world_min_x": -3072.0,
-  "world_min_z": -6144.0
+  "world_min_z": -6144.0,
+  "color": "far_color.jpg",
+  "valid": "far_valid.png"
+ },
+ "horizon": {
+  "file": "horizon_height.r32",
+  "format": "float32_le",
+  "width": 928,
+  "height": 928,
+  "res_m": 32.0,
+  "world_min_x": -13312.0,
+  "world_min_z": -16384.0,
+  "color": "horizon_color.jpg",
+  "valid": "horizon_valid.png"
  },
  "control": {
   "file": "control.r32",

@@ -34,6 +34,8 @@ CORE_MARGIN_M = 300.0  # margin around the race line for the playable 1 m terrai
 FAR_MARGIN_REGIONS = 3  # far ring = core extended by this many Terrain3D regions per side
 CORE_RES_M = 1.0  # game heightmap resolution
 FAR_RES_M = 4.0  # divides the region size -> far vertices coincide with core vertices
+HORIZON_MARGIN_REGIONS = 13  # horizon ring: ~30 km square around the core
+HORIZON_RES_M = 32.0
 SPLAT_RES_M = 1.0
 ORTHO_RES_M = 0.5  # downloaded orthophoto resolution
 TERRAIN3D_REGION_M = 1024  # core extent is padded to a multiple of this

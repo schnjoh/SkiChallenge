@@ -38,7 +38,33 @@
     },
     {
       "heading": "Assets",
-      "entries": []
+      "entries": [
+        {
+          "name": "Snow 02 – Rob Tuytel / Poly Haven",
+          "license": "CC0",
+          "url": "https://polyhaven.com/a/snow_02"
+        },
+        {
+          "name": "Snow 006 – ambientCG",
+          "license": "CC0",
+          "url": "https://ambientcg.com/view?id=Snow006"
+        },
+        {
+          "name": "Snow Field Aerial – Rob Tuytel / Poly Haven",
+          "license": "CC0",
+          "url": "https://polyhaven.com/a/snow_field_aerial"
+        },
+        {
+          "name": "Rock 032 – ambientCG",
+          "license": "CC0",
+          "url": "https://ambientcg.com/view?id=Rock032"
+        },
+        {
+          "name": "Horn-Koppe Snow (HDRI) – Grzegorz Wronkowski / Poly Haven",
+          "license": "CC0",
+          "url": "https://polyhaven.com/a/horn-koppe_snow"
+        }
+      ]
     }
   ]
 }

@@ -31,4 +31,10 @@ Konkret verwendete Datensätze (abgerufen 2026-11-25, Pipeline `tools/pipeline/`
   im Kernausschnitt – ODbL 1.0.
 
 ## Assets
-*Wird ergänzt (HDRI, Texturen, Modelle, Sounds – nur CC0).*
+| Asset | Verwendung | Lizenz | Quelle |
+|---|---|---|---|
+| Snow 02 – Rob Tuytel (Poly Haven) | Terrain-Material „Neuschnee“ | CC0 | https://polyhaven.com/a/snow_02 |
+| Snow 006 – ambientCG | Terrain-Material „Piste“ (verdichteter Schnee) | CC0 | https://ambientcg.com/view?id=Snow006 |
+| Snow Field Aerial – Rob Tuytel (Poly Haven) | Terrain-Material „Waldboden mit Schnee“ | CC0 | https://polyhaven.com/a/snow_field_aerial |
+| Rock 032 – ambientCG | Terrain-Material „Fels“ | CC0 | https://ambientcg.com/view?id=Rock032 |
+| Horn-Koppe Snow – Grzegorz Wronkowski (Poly Haven) | Himmel/Umgebungslicht (HDRI, `sky_2k.hdr`) | CC0 | https://polyhaven.com/a/horn-koppe_snow |

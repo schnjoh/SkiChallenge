@@ -102,6 +102,9 @@ cd game && godot                                            # Spiel starten
 python3 -m venv tools/.venv && tools/.venv/bin/pip install -r tools/requirements.txt
 tools/.venv/bin/python tools/pipeline/run_all.py            # komplette Pipeline inkl. Selbstprüfung
 tools/.venv/bin/python tools/pipeline/preview.py            # Vorschaubilder → docs/img/
+cd game && godot --headless --import                        # NACH JEDEM Pipeline-Lauf (sonst alte Texturen/Schachbrett)
+cd game && godot --path . --display-driver x11 --resolution 1920x1080 res://scenes/tools/screenshot_tour.tscn
+                                                            # Screenshots + fps → docs/img/tour_*.png, tour_fps.txt
 tools/.venv/bin/ruff check tools/pipeline --select E,F,W --line-length 120   # Python-Lint
 ```
 
@@ -115,3 +118,7 @@ tools/.venv/bin/ruff check tools/pipeline --select E,F,W --line-length 120   # P
   → im Export-Preset als Nicht-Ressourcen einschließen (`data/*`). Bilder, die roh bleiben sollen,
   bekommen eine `.import` mit `importer="keep"`.
 - Terrain3D-Probe-Skripte (headless) müssen im ersten `_process`-Frame arbeiten, nicht in `_init` (hängt sonst).
+- Fenster-Läufe (Screenshots/fps) mit `--display-driver x11`: unter Wayland pausiert Godot das Rendern,
+  sobald das Fenster verdeckt ist → Tour hängt. Terrain3D: `change_region_size` erst nach `add_child`.
+- Welt-Aufbau: `World` (scripts/terrain/world.gd) = Environment + `TerrainBuilder` + Bäume (Terrain3D-Instancer)
+  + `RingTerrain` (Fern 4 m, Horizont 32 m). Texturen: `pack_textures.py` aus `data/raw/assets/manifest.json`.

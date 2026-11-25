@@ -33,6 +33,13 @@ def main() -> int:
     h = np.fromfile(out / core["file"], dtype="<f4")
     check(h.size == w * d, f"height.r32 size {h.size}")
     check(bool(np.isfinite(h).all()), "height.r32 has no NaN")
+    for ring in ("far", "horizon"):
+        rg = meta[ring]
+        rh = np.fromfile(out / rg["file"], dtype="<f4")
+        check(rh.size == rg["width"] * rg["height"] and bool(np.isfinite(rh).all()), f"{ring} heights")
+        check(Image.open(out / rg["color"]).size == (rg["width"], rg["height"]), f"{ring} colour map size")
+        check(Image.open(out / rg["valid"]).size == (rg["width"], rg["height"]), f"{ring} valid mask size")
+        check(rg["world_min_x"] % config.TERRAIN3D_REGION_M == 0, f"{ring} region-aligned")
     fh = np.fromfile(out / far["file"], dtype="<f4")
     check(fh.size == far["width"] * far["height"], f"far_height.r32 size {fh.size}")
     check(bool(np.isfinite(fh).all()), "far_height.r32 has no NaN")

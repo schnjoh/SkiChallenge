@@ -13,6 +13,7 @@ from PIL import Image
 from scipy import ndimage
 
 import config
+import winter
 from common import read_json
 from geo import grid_shape
 
@@ -34,14 +35,7 @@ def main() -> None:
     core = read_json(DERIVED / "extent.json")["core"]
     res = core["res"]
     height = np.fromfile(config.OUT / "height.r32", dtype="<f4").reshape(grid_shape(core))
-    gy, gx = np.gradient(height, res)
-    slope_deg = np.degrees(np.arctan(np.hypot(gx, gy)))
-
     rgb = np.load(DERIVED / "ortho_core_1m.npy").astype(np.float32)
-    r, g, b = rgb
-    bright = rgb.mean(0)
-    sat = rgb.max(0) - rgb.min(0)
-    exg = 2 * g - r - b
 
     dgm05 = np.load(DERIVED / "dgm_core_05.npy")
     dom05 = np.load(DERIVED / "dom_core_05.npy")
@@ -52,8 +46,7 @@ def main() -> None:
     corridor = np.load(DERIVED / "corridor_dist.npy")
 
     forest = ndimage.gaussian_filter((chm > config.TREE_MIN_HEIGHT_M).astype(np.float32), 1.5)
-    rock = (slope_deg > 38) | ((sat < 25) & (bright > 90) & (exg < 5) & (slope_deg > 28))
-    rock = ndimage.gaussian_filter(rock.astype(np.float32), 1.0) * (1 - forest)
+    rock = winter.rock_weight(height, res) * (1 - forest)
     piste = np.clip((2.0 - corridor) / 6.0, 0.0, 1.0)  # soft 6 m edge outside the corridor
     rock *= 1 - piste
     forest *= 1 - piste
@@ -66,13 +59,7 @@ def main() -> None:
     splat = (w.transpose(1, 2, 0) * 255 + 0.5).astype(np.uint8)
     Image.fromarray(splat, "RGBA").save(DERIVED / "splat.png")
 
-    # Winter colour map: desaturate, lift towards snow white except under forest.
-    lum = (0.3 * r + 0.59 * g + 0.11 * b) / 255.0
-    snow_col = np.array([0.93, 0.95, 1.0])[:, None, None]
-    tree_col = np.stack([lum * 0.55, lum * 0.65, lum * 0.6])
-    mix = np.clip(forest, 0, 1)[None]
-    col = snow_col * (0.85 + 0.15 * lum[None]) * (1 - mix) + tree_col * mix
-    col = (np.clip(col, 0, 1) * 255).astype(np.uint8).transpose(1, 2, 0)
+    col = winter.colour(rgb, np.clip(forest, 0, 1), tree_canopy=False)
     Image.fromarray(col, "RGB").save(config.OUT / "colormap.jpg", quality=88)
     share = w.reshape(4, -1).mean(1)
     print(f"[splat] snow {share[0]:.2f} piste {share[1]:.2f} forest {share[2]:.2f} rock {share[3]:.2f}")

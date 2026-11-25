@@ -17,7 +17,6 @@ TERRAIN = config.RAW / "terrain"
 def main() -> None:
     ext = read_json(DERIVED / "extent.json")
     core05 = dict(ext["core"], res=0.5, anchor=ext["core"]["res"])
-    far = ext["far"]
     manifest = read_json(DERIVED / "tiles.json") if (DERIVED / "tiles.json").exists() else {}
     for kind, cov in (("dgm", config.COV_DGM), ("dom", config.COV_DOM)):
         files = []
@@ -27,13 +26,17 @@ def main() -> None:
             get_coverage(config.WCS_TERRAIN, cov, config.CRS_PROJECT, bbox, 0.5, out)
             files.append(out.name)
         manifest[kind] = files
-    files = []
-    for i, j, bbox in tiles(grid_area(far), 4608.0):
-        out = TERRAIN / tile_name("dgmfar", bbox, far["res"])
-        print(f"[terrain] far tile {i},{j}")
-        get_coverage(config.WCS_TERRAIN, config.COV_DGM, config.CRS_PROJECT, bbox, far["res"], out)
-        files.append(out.name)
-    manifest["far"] = files
+    # rings: DGM + DOM (DOM - DGM gives forest for the ring colour maps)
+    for ring, tile in (("far", 4608.0), ("horizon", 7424.0)):
+        g = ext[ring]
+        for kind, cov in (("dgm", config.COV_DGM), ("dom", config.COV_DOM)):
+            files = []
+            for i, j, bbox in tiles(grid_area(g), tile):
+                out = TERRAIN / tile_name(f"{kind}{ring}", bbox, g["res"])
+                print(f"[terrain] {ring} {kind} tile {i},{j}")
+                get_coverage(config.WCS_TERRAIN, cov, config.CRS_PROJECT, bbox, g["res"], out)
+                files.append(out.name)
+            manifest[f"{ring}_{kind}" if kind == "dom" else ring] = files
     write_json(DERIVED / "tiles.json", manifest)
     print("[terrain] done")
 

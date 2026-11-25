@@ -146,3 +146,13 @@ def smooth_polyline(pts: np.ndarray, sigma_pts: float) -> np.ndarray:
 def write_r32(path: Path, a: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     np.ascontiguousarray(a, dtype="<f4").tofile(path)
+
+
+def grid_meta(g: dict, core: dict, file: str) -> dict:
+    """meta.json entry: vertex (c, r) of grid g lies at (world_min_x + c*res, world_min_z + r*res)."""
+    rows, cols = grid_shape(g)
+    left, _, _, top = grid_area(g)
+    e = left + 0.5 * g["res"]
+    n = top - 0.5 * g["res"]
+    return {"file": file, "format": "float32_le", "width": cols, "height": rows, "res_m": g["res"],
+            "world_min_x": e - core["e0"], "world_min_z": -(n - core["n0"])}

@@ -21,7 +21,7 @@ from scipy import ndimage
 
 import config
 from common import read_json, write_json
-from geo import (distance_to_polyline, fill_nodata, mosaic_to_grid, nearest_line_index,
+from geo import (distance_to_polyline, grid_meta, fill_nodata, mosaic_to_grid, nearest_line_index,
                  resample_polyline, sample_bilinear, smooth_polyline, write_r32)
 
 DERIVED = config.RAW / "derived"
@@ -133,10 +133,6 @@ def main() -> None:
     write_r32(out / "height.r32", height)
     print(f"[terrain] height.r32 {height.shape} {height.min():.1f}..{height.max():.1f} m")
 
-    print("[terrain] far ring")
-    far_h = fill_nodata(mosaic_to_grid(tile_paths("far"), far, crs, Resampling.nearest)).astype(np.float32)
-    write_r32(out / "far_height.r32", far_h)
-
     # Race line in Godot coordinates on the snow surface.
     y = sample_bilinear(height, core, line[:, 0], line[:, 1])
     x = line[:, 0] - core["e0"]
@@ -172,14 +168,6 @@ def main() -> None:
     write_json(out / "line_stats.json", stats)
     print(f"[terrain] line stats {stats}")
 
-    def grid_meta(g: dict, file: str) -> dict:
-        rows, cols = int(round(g["size_z"] / g["res"])), int(round(g["size_x"] / g["res"]))
-        # world position of vertex (0, 0) (= north-west sample); vertex (c, r) at min + (c, r) * res
-        min_x = g["e0"] - core["e0"]
-        min_z = -(g["n0"] + g["size_z"] - core["n0"])
-        return {"file": file, "format": "float32_le", "width": cols, "height": rows,
-                "res_m": g["res"], "world_min_x": min_x, "world_min_z": min_z}
-
     write_json(out / "meta.json", {
         "track": "Streif, Kitzbühel",
         "crs": crs,
@@ -187,8 +175,10 @@ def main() -> None:
                    "sample (col,row) of a grid lies at (world_min_x + col*res, world_min_z + row*res); "
                    "row 0 = north. Same as Terrain3D import_images at (world_min_x, 0, world_min_z).",
         "origin_e0": core["e0"], "origin_n0": core["n0"], "origin_height": 0.0,
-        "core": grid_meta(core, "height.r32"),
-        "far": grid_meta(far, "far_height.r32"),
+        "core": grid_meta(core, core, "height.r32"),
+        "far": grid_meta(far, core, "far_height.r32") | {"color": "far_color.jpg", "valid": "far_valid.png"},
+        "horizon": grid_meta(ext_def["horizon"], core, "horizon_height.r32")
+        | {"color": "horizon_color.jpg", "valid": "horizon_valid.png"},
         "control": {"file": "control.r32", "format": "uint32_le Terrain3D control map, same grid as core"},
         "colormap": {"file": "colormap.jpg", "note": "RGB tint, same grid as core"},
         "snow_depth_m": config.SNOW_DEPTH_M,

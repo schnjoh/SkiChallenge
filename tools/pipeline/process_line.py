@@ -93,12 +93,16 @@ def main() -> None:
     m = config.FAR_MARGIN_REGIONS * config.TERRAIN3D_REGION_M
     far = {"e0": core["e0"] - m, "n0": core["n0"] - m, "size_x": core["size_x"] + 2 * m,
            "size_z": core["size_z"] + 2 * m, "res": config.FAR_RES_M}
+    m = config.HORIZON_MARGIN_REGIONS * config.TERRAIN3D_REGION_M
+    horizon = {"e0": core["e0"] - m, "n0": core["n0"] - m, "size_x": core["size_x"] + 2 * m,
+               "size_z": core["size_z"] + 2 * m, "res": config.HORIZON_RES_M}
 
     write_json(DERIVED / "line_31255.json", {
         "crs": config.CRS_PROJECT, "source": f"OSM relation {config.OSM_RELATION_ID} (ODbL)",
         "points": [[round(e, 3), round(n, 3)] for e, n in line], "named": named,
     })
-    write_json(DERIVED / "extent.json", {"crs": config.CRS_PROJECT, "core": core, "far": far})
+    write_json(DERIVED / "extent.json", {"crs": config.CRS_PROJECT, "core": core, "far": far,
+                                         "horizon": horizon})
     print(f"[line] {len(line)} pts, {polyline_length(line):.0f} m, start {line[0]}, end {line[-1]}")
     print(f"[line] core {core}\n[line] far  {far}")
 
