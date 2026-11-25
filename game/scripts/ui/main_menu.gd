@@ -20,6 +20,8 @@ func _ready() -> void:
 	world = World.new()
 	world.tree_density = minf(0.5, float(Session.get_setting("tree_density")))
 	world.view_distance = float(Session.get_setting("view_distance"))
+	world.shadows = int(Session.get_setting("shadows")) > 0
+	world.quality = clampi(int(Session.get_setting("shadows")), 0, 2)
 	add_child(world)
 	cam = Camera3D.new()
 	cam.far = 20000.0
@@ -292,6 +294,14 @@ func _build_credits() -> void:
 				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				l.custom_minimum_size = Vector2(560, 0)
 				list.add_child(l)
+	# Terrain3D (MIT) notice, shipped in the pck via the export include filter
+	var t3d: String = FileAccess.get_file_as_string("res://addons/terrain_3d/LICENSE.txt")
+	if not t3d.is_empty():
+		list.add_child(_label("Terrain3D", 20, Color(1.0, 0.8, 0.35)))
+		var tl: Label = _label(t3d, 13, Color(0.85, 0.88, 0.95))
+		tl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		tl.custom_minimum_size = Vector2(560, 0)
+		list.add_child(tl)
 	# engine license and third-party notices (required for exported builds)
 	list.add_child(_label("Godot Engine", 20, Color(1.0, 0.8, 0.35)))
 	var lic: Label = _label(Engine.get_license_text(), 13, Color(0.85, 0.88, 0.95))
@@ -317,4 +327,7 @@ func _start(mode: int, section: String) -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("pause") or event.is_action_pressed("ui_cancel"):
+		if (_pages["settings"] as Control).visible:
+			Session.load_settings()  # leaving without saving discards the changes, like "Zurück"
+			_refresh_settings()
 		_show("main")

@@ -35,8 +35,8 @@ func clear() -> void:
 
 
 func _process(_dt: float) -> void:
-	if rider == null or rider.physics == null:
-		return
+	if rider == null or rider.physics == null or rider.frozen:
+		return  # no new grooves during countdown, replay or the F2 editor
 	var ph: SkiPhysics = rider.physics
 	var ground: bool = not ph.is_airborne() and not ph.is_crashed() and ph.speed() > 1.0
 	if not ground:

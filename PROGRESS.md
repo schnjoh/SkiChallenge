@@ -1,7 +1,7 @@
 # PROGRESS.md
 
 ## Stand (2026-11-25)
-- Phase 0–4: **abgeschlossen** (Reviews Phase 2+3 und 4 umgesetzt).
+- Phase 0–4: **abgeschlossen** (Reviews Phase 2+3, 4 und 5/6 umgesetzt).
 - Phase 5 – Spielablauf: **abgeschlossen** (Menü, Rennen/Training, HUD, Ghost, Bestenliste, Wiederholung,
   Pause, prozedurale Sounds, Grafikeinstellungen, Credits-Screen).
 - Phase 6 – Feinschliff: **abgeschlossen** bis auf das 60-fps-Ziel auf „mittel“ (siehe Offene Punkte);
@@ -98,4 +98,8 @@
 - μ_Gleit 0,022 (gewachste Rennski) statt 0,03: Ø-Tempo-Prüfung strikt 101–107 km/h ohne Toleranz.
 - Bot springt 0,3 s vor den Kanten aus `jumps.json` vor (DESIGN §4.7).
 - Standard-Grafik = „mittel“; Schattenqualität „mittel“ ohne Gelände-/Baumschatten, 1 Kaskade, Atlas 2048.
+- Bot-/Demo-Läufe (`Game.enable_bot`, Perf-Messung) schreiben nie in Bestenliste/Ghost (`record_results`);
+  gewertet wird nur mit Standard-Handling (F1-Änderungen = „nicht gewertet“). Bei der Messung entstandene
+  Bot-Einträge in `user://` wurden entfernt (Review Phase 5/6).
+- Replay am Gamepad auf R3 (Guide wird oft vom System abgefangen).
 - Exportvorlagen offiziell von GitHub (nur Linux/Windows x86_64 entpackt nach `~/.local/share/godot/export_templates`).

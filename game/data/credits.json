@@ -25,9 +25,9 @@
       "heading": "Geodaten",
       "entries": [
         {
-          "name": "Datenquelle: Land Tirol – data.tirol.gv.at (Geländemodell/Oberflächenmodell 50 cm, Orthofoto)",
+          "name": "Datenquelle: Land Tirol – data.tirol.gv.at (Geländemodell/Oberflächenmodell 50 cm, Orthofoto); bearbeitet: Heightmap 1 m, Pistenpräparierung, Sprünge, winterlich umgefärbt",
           "license": "CC BY 4.0",
-          "url": "https://www.tirol.gv.at/data/"
+          "url": "https://www.tirol.gv.at/data/ · https://creativecommons.org/licenses/by/4.0/"
         },
         {
           "name": "© OpenStreetMap contributors (Streif-Rennstrecke, Gebäude; abgeleitete Streckendateien unter ODbL)",

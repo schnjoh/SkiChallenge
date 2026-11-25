@@ -28,6 +28,7 @@ var pause_menu: PauseMenu
 var tuning: SkiTuning
 var timer: RaceTimer
 var bot: BotDriver
+var record_results: bool = true  ## false for bot/demo runs: never touch leaderboard or ghost
 var state: State = State.COUNTDOWN
 var mode: int = 0  ## Session.Mode
 var leaderboard: Leaderboard
@@ -168,6 +169,7 @@ func update_frozen() -> void:
 ## Lets the validation bot drive (demo / screenshots).
 func enable_bot() -> void:
 	bot = BotDriver.for_track(world.track)
+	record_results = false
 	rider.autopilot = bot.drive
 
 
@@ -247,11 +249,15 @@ func _on_finish(t: float) -> void:
 	run_record.final_time = t
 	run_record.splits = timer.split_times
 	var sub: String = ""
-	if mode == Session.Mode.RACE:
+	if mode == Session.Mode.RACE and not record_results:
+		sub = "Bot-Lauf – nicht gewertet"
+	elif mode == Session.Mode.RACE and not tuning_is_standard():
+		sub = "Geändertes Handling (F1) – nicht gewertet"
+	elif mode == Session.Mode.RACE:
 		var best: float = leaderboard.best_time(TRACK_ID)
 		_last_rank = leaderboard.add(TRACK_ID, str(Session.get_setting("player_name")), t, timer.split_times)
 		leaderboard.save()
-		if best < 0.0 or t < best:
+		if best < 0.0 or t < best or best_ghost == null:
 			run_record.save(GHOST_PATH)
 			best_ghost = run_record  # restart_run() starts a fresh recording, the replay still works
 			if ghost_visual == null and bool(Session.get_setting("ghost")):
@@ -262,17 +268,22 @@ func _on_finish(t: float) -> void:
 			sub = "Rückstand %s" % RaceTimer.format_delta(t - best)
 		if _last_rank > 0:
 			sub += "   ·   Platz %d" % _last_rank
-	hud.show_message("ZIEL  %s" % RaceTimer.format_time(t), sub + "\nR Neustart · Enter Wiederholung · Esc Menü")
+	hud.show_message("ZIEL  %s" % RaceTimer.format_time(t), sub + "\nR Neustart · Enter Wiederholung · Esc Pause")
 	audio.cheer()
 	spectators.set_cheer(1.0)
 	run_finished.emit(t, _last_rank)
+
+
+## Leaderboard/ghost only count with the shipped handling (F1 changes would make times incomparable).
+func tuning_is_standard() -> bool:
+	return tuning.to_dict() == (load(TUNING_PATH) as SkiTuning).to_dict()
 
 
 func _on_dsq(reason: String) -> void:
 	if state != State.RUNNING:
 		return
 	state = State.DONE
-	hud.show_message("DISQUALIFIZIERT", reason + "\nR Neustart · Enter Wiederholung · Esc Menü")
+	hud.show_message("DISQUALIFIZIERT", reason + "\nR Neustart · Enter Wiederholung · Esc Pause")
 
 
 func _on_crash(reason: String) -> void:
@@ -280,7 +291,7 @@ func _on_crash(reason: String) -> void:
 		return
 	state = State.DONE
 	timer.abort()
-	hud.show_message("STURZ", reason + "\nR Neustart · Enter Wiederholung · Esc Menü")
+	hud.show_message("STURZ", reason + "\nR Neustart · Enter Wiederholung · Esc Pause")
 
 
 func _start_replay() -> void:

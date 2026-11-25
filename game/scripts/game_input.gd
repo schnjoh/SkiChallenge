@@ -25,7 +25,7 @@ const PAD_BUTTONS: Dictionary = {
 	"pause": [JOY_BUTTON_START],
 	"section_prev": [JOY_BUTTON_LEFT_SHOULDER],
 	"section_next": [JOY_BUTTON_RIGHT_SHOULDER],
-	"replay": [JOY_BUTTON_GUIDE],
+	"replay": [JOY_BUTTON_RIGHT_STICK],
 }
 const PAD_AXES: Dictionary = {
 	"steer_left": [JOY_AXIS_LEFT_X, -1.0],

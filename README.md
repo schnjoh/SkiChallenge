@@ -19,7 +19,8 @@ Ohne `git-lfs` fehlen Heightmaps und Texturen (Terrain3D lädt dann nicht).
 - **Rennen**: Countdown, 41 Tore in fester Reihenfolge (ausgelassenes Tor = Disqualifikation),
   5 Zwischenzeiten mit Rückstand zur Bestzeit, Ghost des besten Laufs, lokale Bestenliste (Top 10).
 - **Training**: Start an jedem Abschnitt (Mausefalle, Steilhang, Hausbergkante …), Q/E wechselt den Abschnitt.
-- Nach dem Lauf: **Enter** = Wiederholung, **R** = Neustart, **Esc** = Pause/Menü.
+- Nach dem Lauf: **Enter** = Wiederholung, **R** = Neustart, **Esc** = Pause (→ Hauptmenü).
+- Gewertet (Bestenliste/Ghost) werden nur Rennen mit dem Standard-Handling; mit F1 geänderte Werte zählen nicht.
 - Stürze: zu harte Landung, verkantet gelandet, Überlast, mit Tempo ins Netz.
 
 ### Steuerung
@@ -31,7 +32,7 @@ Ohne `git-lfs` fehlen Heightmaps und Texturen (Terrain3D lädt dann nicht).
 | Vorspringen (vor der Kante) | Strg / J | X |
 | Neustart | R / Backspace | Y |
 | Kamera (Verfolger/Helm) | C | Back |
-| Wiederholung | Enter | Guide |
+| Wiederholung | Enter | rechter Stick (R3) |
 | Training: Abschnitt zurück/vor | Q / E (Bild↑/↓) | LB / RB |
 | Pause | Esc | Start |
 | Handling-Tuning (Regler, Presets) | F1 | – |
@@ -54,6 +55,7 @@ godot --headless -s scripts/tools/validate_track.gd          # Validierungs-Bot 
 godot --headless -s scripts/tools/generate_track.gd -- --force   # racing_line.json + gates.json neu
 godot --path . --display-driver x11 --resolution 1920x1080 res://scenes/tools/screenshot_tour.tscn
 PERF_PRESET=medium godot --path . --display-driver x11 --resolution 1920x1080 res://scenes/tools/perf_run.tscn
+mkdir -p ../export/linux ../export/windows
 godot --headless --export-release "Linux" ../export/linux/Schussfahrt.x86_64
 godot --headless --export-release "Windows" ../export/windows/Schussfahrt.exe
 ```
