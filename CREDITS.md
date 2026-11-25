@@ -23,7 +23,12 @@ Exportierte Builds enthalten die Godot-Lizenz und Drittanbieter-Hinweise (`Engin
 Aus OSM abgeleitete Dateien (`line.json`, `racing_line.json`, `gates.json`, `sections.json`) stehen als
 abgeleitete Datenbank unter **ODbL 1.0** (Share-Alike).
 
-*Konkrete Datensätze/Flugjahre trägt die Pipeline in Phase 1 nach.*
+Konkret verwendete Datensätze (abgerufen 2026-11-25, Pipeline `tools/pipeline/`):
+- Land Tirol WCS `terrain`: `Gelaendemodell_50cm_M31`, `Oberflaechenmodell_50cm_M31` (EPSG:31255,
+  ALS-Mosaik, aktueller Stand des Dienstes; Flugjahre je Kachel 2020er) – CC BY 4.0.
+- Land Tirol WCS `orthofoto`: `Aktuell_RGB` (EPSG:31254, 0,5 m abgerufen) – CC BY 4.0, winterlich umgefärbt.
+- OpenStreetMap: Route-Relation 12870777 „Streif-Rennstrecke“ und Gebäudeumrisse (`building=*`)
+  im Kernausschnitt – ODbL 1.0.
 
 ## Assets
 *Wird ergänzt (HDRI, Texturen, Modelle, Sounds – nur CC0).*
