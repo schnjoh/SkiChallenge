@@ -1,0 +1,17 @@
+# Visual reference screenshots of the original game: never commit, never use as assets
+reference/
+# Raw downloads (DGM/DOM/Orthofoto/OSM) – reproducible via tools/pipeline
+data/raw/
+# Python
+tools/.venv/
+__pycache__/
+*.pyc
+# Godot
+game/.godot/
+game/.import/
+*.translation
+export/
+build/
+# User-local
+game/user_presets/
+.claude/settings.local.json
