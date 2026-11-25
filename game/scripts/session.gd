@@ -6,10 +6,10 @@ enum Mode { RACE, TRAINING }
 const SETTINGS_PATH: String = "user://settings.json"
 const DEFAULTS: Dictionary = {
 	"player_name": "Fahrer",
-	"render_scale": 1.0,  ## 3D resolution scale (FSR 1 below 1.0)
+	"render_scale": 0.8,  ## 3D resolution scale (FSR 1 below 1.0)
 	"fsr": true,
-	"view_distance": 1.0,  ## 0.4..1.0, scales fog/far ring/tree LOD distances
-	"tree_density": 0.6,
+	"view_distance": 0.7,  ## 0.4..1.0, scales fog/far ring/tree LOD distances
+	"tree_density": 0.5,
 	"shadows": 1,  ## 0 off, 1 medium, 2 high
 	"msaa": 0,  ## 0 off, 1 2x, 2 4x
 	"vsync": true,

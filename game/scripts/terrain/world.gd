@@ -8,6 +8,8 @@ signal built
 @export_range(0.0, 1.0) var tree_density: float = 1.0
 @export var build_on_ready: bool = true
 @export var shadows: bool = true
+## 0 low .. 2 high: terrain self-shadowing, shadow distance and clipmap density (Phase 6 budget).
+@export_range(0, 2) var quality: int = 2
 @export var rings: bool = true
 @export_range(0.3, 1.0) var view_distance: float = 1.0  ## scales fog, tree LOD and far-ring detail
 
@@ -31,6 +33,9 @@ func build() -> void:
 		return
 	_build_environment()
 	terrain = TerrainBuilder.build(track, self)
+	terrain.mesh_size = [24, 32, 48][clampi(quality, 0, 2)]
+	terrain.cast_shadows = RenderingServer.SHADOW_CASTING_SETTING_ON if quality >= 2 \
+			else RenderingServer.SHADOW_CASTING_SETTING_OFF
 	terrain.set_clipmap_target(self)  # until a camera is assigned (avoids Terrain3D camera errors)
 	if tree_density > 0.0:
 		tree_count = TerrainBuilder.add_trees(terrain, track, tree_density, view_distance)
@@ -80,5 +85,5 @@ func _build_environment() -> void:
 	sun.light_color = Color(1.0, 0.97, 0.92)
 	sun.shadow_enabled = shadows
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
-	sun.directional_shadow_max_distance = 200.0
+	sun.directional_shadow_max_distance = [80.0, 120.0, 300.0][clampi(quality, 0, 2)]
 	add_child(sun)

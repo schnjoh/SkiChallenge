@@ -49,6 +49,7 @@ func _ready() -> void:
 	world = World.new()
 	world.tree_density = float(Session.get_setting("tree_density"))
 	world.shadows = int(Session.get_setting("shadows")) > 0
+	world.quality = clampi(int(Session.get_setting("shadows")), 0, 2)
 	world.view_distance = float(Session.get_setting("view_distance"))
 	add_child(world)
 	var track: TrackData = world.track
@@ -56,8 +57,6 @@ func _ready() -> void:
 		push_error("Game: track data missing")
 		return
 	Session.apply_viewport_settings(get_viewport())
-	if int(Session.get_setting("shadows")) > 1:
-		world.sun.directional_shadow_max_distance = 300.0
 	gates = GateSet.for_track(track)
 	barriers = CourseBarriers.build(track)
 	course = CourseBuilder.new()
