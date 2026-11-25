@@ -85,7 +85,7 @@ SHAPING_GROOM_SPEEDS_KMH = {
 }
 # Modelled jumps: lip position s (m along line.json), design take-off speed, target length.
 SHAPING_JUMPS = [
-    {"name": "Mausefalle", "s_lip": 136.0, "v_kmh": 100.0, "length_m": 45.0, "impact_deg": 6.0, "runout_g": 3.0},
+    {"name": "Mausefalle", "s_lip": 136.0, "v_kmh": 100.0, "length_m": 45.0, "impact_deg": 9.0, "runout_g": 3.0},
     {"name": "Seidlalmsprung", "s_lip": 1546.0, "v_kmh": 80.0, "length_m": 32.0, "impact_deg": 6.0, "runout_g": 3.0},
     {"name": "Hausbergkante", "s_lip": 2412.0, "v_kmh": 95.0, "length_m": 32.0, "impact_deg": 6.0, "runout_g": 3.0},
     {"name": "Zielsprung", "s_lip": 2876.0, "v_kmh": 130.0, "length_m": 50.0, "impact_deg": 5.0, "runout_g": 3.0},

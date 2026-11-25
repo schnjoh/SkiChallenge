@@ -6,7 +6,7 @@ extends Resource
 @export_group("Körper & Luft")
 @export_range(50.0, 150.0, 1.0, "suffix:kg") var mass: float = 95.0
 @export_range(0.8, 1.3, 0.01, "suffix:kg/m³") var air_density: float = 1.05
-@export_range(0.05, 0.6, 0.005, "suffix:m²") var cda_tuck: float = 0.16
+@export_range(0.05, 0.6, 0.005, "suffix:m²") var cda_tuck: float = 0.22
 @export_range(0.2, 1.2, 0.01, "suffix:m²") var cda_upright: float = 0.55
 @export_range(0.3, 2.0, 0.01, "suffix:m²") var cda_brake: float = 0.95
 @export_range(0.5, 10.0, 0.1, "suffix:1/s") var tuck_rate: float = 4.0

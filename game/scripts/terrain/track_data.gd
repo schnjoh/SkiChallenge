@@ -15,6 +15,7 @@ var line_s: PackedFloat32Array = PackedFloat32Array()
 var sections: Array[Dictionary] = []
 var jumps: Array[Dictionary] = []  ## jumps.json "jumps" (s_lip on the centre line, v_kmh, length_m)
 var racing_line: PackedVector3Array = PackedVector3Array()  ## racing_line.json (empty if missing)
+var stats: Dictionary = {}  ## line_stats.json (length_3d_m, drop_m, ...)
 
 
 static func load_track(track_dir: String = DEFAULT_DIR) -> TrackData:
@@ -41,6 +42,7 @@ static func load_track(track_dir: String = DEFAULT_DIR) -> TrackData:
 	var jj: Dictionary = _read_json(track_dir.path_join("jumps.json"))
 	for j: Variant in jj.get("jumps", []):
 		td.jumps.append(j as Dictionary)
+	td.stats = _read_json(track_dir.path_join("line_stats.json"))
 	td.racing_line = RacingLine.load_points(track_dir.path_join(RacingLine.FILE))
 	return td
 
