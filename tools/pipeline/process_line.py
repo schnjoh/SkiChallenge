@@ -21,9 +21,9 @@ def chain_ways(ways: list[list[tuple[float, float]]]) -> list[tuple[float, float
     if len(ways) > 1:
         nxt = ways[1]
         # orient the first way so that its end touches the second way
-        if _dist(line[0], nxt[0]) < _dist(line[-1], nxt[0]) and _dist(line[0], nxt[0]) < _dist(line[-1], nxt[-1]):
-            line.reverse()
-        elif _dist(line[0], nxt[-1]) < min(_dist(line[-1], nxt[0]), _dist(line[-1], nxt[-1])):
+        start_gap = min(_dist(line[0], nxt[0]), _dist(line[0], nxt[-1]))
+        end_gap = min(_dist(line[-1], nxt[0]), _dist(line[-1], nxt[-1]))
+        if start_gap < end_gap:
             line.reverse()
     for w in ways[1:]:
         seg = list(w)
@@ -89,8 +89,10 @@ def main() -> None:
     core = aligned_extent(min(es), min(ns), max(es), max(ns), config.CORE_MARGIN_M,
                           config.TERRAIN3D_REGION_M)
     core["res"] = config.CORE_RES_M
-    far = aligned_extent(min(es), min(ns), max(es), max(ns), config.FAR_MARGIN_M, 1000.0)
-    far["res"] = config.FAR_RES_M
+    # far ring: core grown by whole Terrain3D regions -> far vertices coincide with core vertices
+    m = config.FAR_MARGIN_REGIONS * config.TERRAIN3D_REGION_M
+    far = {"e0": core["e0"] - m, "n0": core["n0"] - m, "size_x": core["size_x"] + 2 * m,
+           "size_z": core["size_z"] + 2 * m, "res": config.FAR_RES_M}
 
     write_json(DERIVED / "line_31255.json", {
         "crs": config.CRS_PROJECT, "source": f"OSM relation {config.OSM_RELATION_ID} (ODbL)",

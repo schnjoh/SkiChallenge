@@ -1,12 +1,12 @@
 {
  "length_2d_m": 3059.8,
- "length_3d_m": 3220.3,
+ "length_3d_m": 3220.0,
  "start_alt_m": 1663.0,
  "finish_alt_m": 805.1,
  "drop_m": 857.9,
  "mean_gradient_pct": 28.0,
  "max_gradient_10m_pct": 77.2,
  "max_gradient_10m_at_s": 140.0,
- "max_gradient_50m_pct": 71.1,
+ "max_gradient_50m_pct": 71.2,
  "max_gradient_50m_at_s": 138.0
 }

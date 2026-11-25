@@ -16,9 +16,8 @@ DERIVED = config.RAW / "derived"
 
 def main() -> None:
     core = read_json(DERIVED / "extent.json")["core"]
-    g = dict(core, res=config.SPLAT_RES_M)
-    paths = sorted((config.RAW / "ortho").glob("ortho_*.tif"))
-    rgb = mosaic_to_grid(paths, g, config.CRS_PROJECT, Resampling.average, bands=3,
+    paths = [config.RAW / "ortho" / f for f in read_json(DERIVED / "tiles.json")["ortho"]]
+    rgb = mosaic_to_grid(paths, core, config.CRS_PROJECT, Resampling.average, bands=3,
                          dtype="uint8", nodata=0)
     np.save(DERIVED / "ortho_core_1m.npy", rgb)
     print(f"[ortho] {rgb.shape}, mean RGB {rgb.reshape(3, -1).mean(1).round(1)}")

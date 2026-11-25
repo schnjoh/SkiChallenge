@@ -1,50 +1,44 @@
 # PROGRESS.md
 
 ## Stand (2026-11-25)
-- Phase 0 – Design & Setup: **abgeschlossen** (Review durchgeführt, gepusht).
-- **Phase 1 – Datenpipeline: inhaltlich fertig, Phasenabschluss offen** (Review-Sub-Agent fehlt noch).
-- Phase 2–6: offen.
+- Phase 0 – Design & Setup: **abgeschlossen**.
+- Phase 1 – Datenpipeline: **abgeschlossen** (Review umgesetzt, 25/25 Selbstprüfungen grün, gepusht).
+- **Phase 2 – Gelände in Godot: begonnen** (`HeightField` fertig + getestet).
 
-## Exakt nächster Schritt
-1. Phase-1-Review-Sub-Agent starten (Pipeline-Code `tools/pipeline/*`, Ausgaben `game/data/streif/*`,
-   Vorschaubilder `docs/img/`), Funde beheben, die 4 Ruff-Stilfunde (s. u.) mit beheben.
-2. CREDITS.md/credits.json um konkrete Datensätze ergänzen (WCS-Coverages, Orthofoto `Aktuell_RGB`,
-   OSM-Gebäude) → Commit → Push → Statusmeldung Phase 1.
-3. Dann Phase 2: Godot-Loader für `meta.json`/`height.r32` (`FileAccess` + `Image.create_from_data(FORMAT_RF)`),
-   Terrain3D-Import (3×3 Regionen à 1024 m, `vertex_spacing` 1.0, Position `(0,0,-3072)`),
-   GUT-Test der Weltabbildung (Start bei x≈1022, z≈−542, y≈1663).
+## Exakt nächster Schritt (Phase 2)
+1. `game/scripts/terrain/track_data.gd`: lädt `meta.json`, `line.json`, `sections.json`, `HeightField`
+   (`height.r32`, Vertex-Konvention aus meta). GUT-Test: Start (x≈1022, z≈−542) → y≈1663.
+2. `terrain_builder.gd`: Terrain3D per Code (region_size 1024, vertex_spacing 1), `import_images`
+   mit height + control (`control.r32` → FORMAT_RF-Bytes) + colormap an `(0,0,-3072)`; 4 Texturen
+   (Schnee, Piste, Waldboden, Fels; CC0 von Poly Haven/ambientCG via Asset-Sub-Agent).
+3. Fernring-Mesh aus `far_height.r32` (Kern ausgespart), Bäume über `Terrain3DInstancer.add_transforms`
+   (Low-Poly-Nadelbaum per Code), Himmel/HDRI, Nebel.
+4. Screenshot-Tool: feste Kameras (Start, Mausefalle, Steilhang, Hausbergkante, Ziel) → `docs/img/`,
+   ansehen, korrigieren. Messwerte gegen Recherche in `docs/validation.md`.
 
 ## Erledigt
 - Phase 0: Godot 4.7.2 + git-lfs nach ~/.local ohne sudo; venv mit rasterio (GDAL 3.12);
   Godot-Projekt `game/` mit GUT 9.7.1 + Terrain3D 1.1.0; Recherche, DESIGN, CLAUDE, CREDITS, README.
 - Phase 1 (`tools/pipeline/`, Einstieg `run_all.py`):
-  - `fetch_osm.py` Relation 12870777 (25 Elemente), `process_line.py` Linie EPSG:31255 + Extents
-    (Kern 3072×3072 m ab E0=−73592, N0=254075; Fern 8000×8000 m, 5 m).
-  - `fetch_terrain.py` WCS DGM+DOM 50 cm (18 Kacheln) + Fernring; `fetch_ortho.py` Orthofoto 0,5 m (16 Kacheln).
-  - `process_terrain.py` → `height.r32` (Schneeoberfläche: Korridor geglättet σ 1,5 m, +0,3 m),
-    `far_height.r32`, `meta.json`, `line.json` (2 m, geglättet, am Ziel bei 805 m geschnitten),
-    `sections.json` (15 Abschnitte inkl. Start, Breiten tunebar), `line_stats.json`.
-  - `fetch_osm_buildings.py` + `process_buildings.py` → Gebäudemaske, `buildings.json` (1643 Gebäude).
-  - `process_trees.py` → `trees.bin` (98 420 Bäume, Median 23,9 m); `process_splat.py` → `splat.png`, `colormap.jpg`.
-  - `check_outputs.py`: 19 Prüfungen **alle grün**. `preview.py` → `docs/img/` (visuell geprüft).
+  - OSM-Relation 12870777 → Linie EPSG:31255; Kern 3072×3072 m (E0=−73592, N0=254075), Fern 9216 m @ 4 m.
+  - WCS-Kacheln exakt auf Pipeline-Raster, Cache-Name enthält BBox/Auflösung, Manifest `derived/tiles.json`,
+    Validierung von CRS/Bounds/Auflösung; Overpass mit Mirror-Fallback und `remark`-Ablehnung.
+  - Ausgaben `game/data/streif/`: `height.r32`, `far_height.r32`, `control.r32`, `colormap.jpg`, `meta.json`,
+    `line.json`, `sections.json`, `line_stats.json`, `trees.bin` (98 068 Bäume), `buildings.json` (1652).
+  - Heightmap-Vertices gegen Roh-DGM verifiziert: Abweichung 0,000 m (3894 Stichproben).
+- Phase 2: `HeightField` (Dreiecks-Interpolation wie Terrain3D, Normalen), 4 GUT-Tests.
 - Messwerte vs. Recherche: Start 1663 m (1665), Ziel 805 m (805), Δh 858 m (860), Länge 3D 3220 m
   (3312, −2,8 %), Ø-Gefälle 28 % (27 %), Max. 77 % über 10 m bei s=140 (85 % Mausefalle).
 
-## Build / Lint / Tests (Stand dieses Commits)
-- Godot-Import: fehlerfrei. GUT: 5/5 grün. Smoketest: 0 ERROR/WARNING. Python compileall: ok.
-- `check_outputs.py`: PASSED.
-- **Ruff (rot, nicht gefixt):** `preview.py:54,55` E731 (lambda-Zuweisung), `process_line.py:24` E501,
-  `run_all.py:18` E501. Rein stilistisch.
+## Build / Lint / Tests
+- Godot-Import fehlerfrei, GUT 9/9 grün, Smoketest 0 Fehler, Ruff sauber, `check_outputs` 25/25.
 
 ## Offene Bugs / Auffälligkeiten
-- Maximalgefälle Mausefalle 77 % statt 85 %: DGM ist Sommergelände; Kante in Phase 4 über `jumps.json` modellieren.
-- Pistenbreiten in `config.SECTION_WIDTHS_M` geschätzt (keine Quelle) → in Phase 2 per Screenshot prüfen.
-- Splat „Fels“ heuristisch (Neigung > 38° oder graue, helle, nicht grüne Pixel) – visuell prüfen.
-- Forststraßen (Brückenschuss/Gschöss) nur über die Korridor-Glättung ausgerundet, kein eigenes Profil.
-- Flugjahr der ALS-Daten liefert der WCS nicht → in CREDITS als „aktueller Stand WCS“ ausweisen.
-- `fetch_osm.py` prüft einen vorhandenen Cache nicht auf Vollständigkeit (ein alter, unvollständiger
-  Cache würde übernommen; aktueller Cache ist vollständig).
-- Export-Ausschlüsse (GUT, Terrain3D csharp/extras) noch nicht gesetzt (Phase 6).
+- Maximalgefälle Mausefalle 77 % statt 85 %: Kante in Phase 4 über `jumps.json` modellieren.
+- Pistenbreiten in `config.SECTION_WIDTHS_M` geschätzt → in Phase 2 per Screenshot prüfen.
+- Splat „Fels“ heuristisch – visuell prüfen. Forstwege nur über starke Glättung (σ 5 m) ausgerundet.
+- Multipolygon-Gebäude (OSM-Relationen) fehlen in `buildings.json`.
+- Export-Ausschlüsse/-Einschlüsse (GUT, Terrain3D csharp/extras; `data/*` als Nicht-Ressourcen) in Phase 6.
 
 ## Entscheidungen
 - **Spieltitel „Schussfahrt“** (eigener Begriff, markenfrei).
@@ -53,15 +47,21 @@
 - Python: rasterio-Wheels statt System-GDAL (kein sudo). Ruff als Linter.
 - GUT 9.7.1 (einzige 4.7-kompatible), Terrain3D 1.1.0 (4.5–4.8); nur Linux/Windows-x86_64-Binaries.
 - CRS **EPSG:31255** (Tiroler ALS Zone M31); Orthofoto (EPSG:31254) wird umprojiziert.
-- Terrain-Download per WCS 1.0.0, Kacheln um −0,25 m verschoben → native Pixelmitten, kein Server-Resampling.
-- Kern auf Terrain3D-Regionen ausgerichtet: 3×3 × 1024 m, 1 m Auflösung; Fernring 8 km, 5 m (aus 50-cm-Coverage mit resx=5).
+- **Raster-Konvention „Sample = Vertex“** (statt Zellmitte): Terrain3D legt Pixel (c,r) auf Vertex (c,r) – per
+  Probe-Skript gemessen; Halbmeter-Versatz zwischen Render und Physik damit ausgeschlossen (Review Phase 1).
+- Terrain3D-Dreiecksdiagonale (x,z)→(x+1,z+1) aus `bake_mesh` gemessen; `get_height` interpoliert nicht.
+- Terrain-Download per WCS 1.0.0 exakt auf dem Pipeline-Raster (Mosaik = Identität), 1 m = Mittel aus 2×2.
+- Kern auf Terrain3D-Regionen ausgerichtet: 3×3 × 1024 m, 1 m; Fernring = Kern + 3 Regionen je Seite, 4 m.
 - Heightmaps als roh float32 (`.r32`) statt EXR; Abbildung `x=E−E0, y=h, z=−(N−N0)`, Zellmitten.
-- Rennlinie: OSM-Relation 12870777, Resampling 2 m, Gauß-Glättung σ 10 m, Schnitt bei 805 m.
+- Rennlinie: OSM-Relation 12870777, Resampling 2 m, erst Zielschnitt bei 805 m (auf Rohlinie), dann Glättung
+  σ 10 m inkl. 120 m Auslauf; Korridor läuft 120 m über das Ziel (Zielraum).
+- Forstwegabschnitte (Brückenschuss, Gschöss) mit σ 5 m statt 1,5 m geglättet (Wegkanten).
 - Schneeoberfläche: im Korridor (+10 m weicher Rand) Gauß σ 1,5 m, überall +0,3 m Schnee.
 - Bäume: lokale Maxima der Vegetationshöhe (Fenster 3 m) > 3 m, außerhalb Korridor + 4 m und
   außerhalb OSM-Gebäuden (+1,5 m). **Gebäude-Heuristik (Dachrauheit) verworfen**, weil Satteldächer
   als Wald erkannt wurden → OSM-Gebäudeumrisse als Maske (sichtbarer Fehler in der Vorschau, behoben).
-- Splat: R Schnee, G Piste (Korridor, 6 m weicher Rand), B Wald (Vegetation > 3 m), A Fels; Farbkarte
+- Texturierung über **Terrain3D-Control-Map** (`control.r32`, Bitformat per Probe ermittelt) statt RGBA-Splat
+  (Godot-Import hätte die Gewichte verfälscht); RGBA-Splat nur noch als Vorschau. Farbkarte
   winterlich umgefärbt (Orthofotos sind Sommerbilder).
 - Maximalgefälle 85 % der Mausefalle zugeordnet (Mehrheit der Quellen).
 - Bot-Ziel 1:50–2:00 skaliert auf Spiellänge + Ø 101–107 km/h + Abschnittstempi.

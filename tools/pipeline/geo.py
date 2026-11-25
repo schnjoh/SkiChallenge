@@ -1,9 +1,12 @@
 """Grid / raster helpers shared by the processing steps.
 
-World mapping (DESIGN.md 4.1, binding):
-    x = E - E0,  y = h,  z = -(N - N0)
-Heightmap pixel (col, row), row 0 = north edge, is a *cell centre*:
-    E = E0 + (col + 0.5) * res,  N = N0 + size_z - (row + 0.5) * res
+Grid convention (DESIGN.md 4.1, binding; identical to Terrain3D's import):
+    world x = E - E0,  y = h,  z = -(N - N0)          (E0/N0 = core origin, meta.json)
+A grid dict has e0, n0, size_x, size_z, res and ``anchor`` (default = res). Its samples are
+*vertices*; sample (col, row), row 0 = north, lies at
+    E = e0 + (col + 0.5) * res - anchor / 2,   N = n0 + size_z - (row + 0.5) * res + anchor / 2
+For the 1 m core (anchor 1): E = E0 + col, N = N0 + 3072 - row  ->  x = col, z = row - 3072.
+A 0.5 m grid with anchor 1 subdivides each 1 m vertex cell into exactly 2x2 samples.
 """
 from __future__ import annotations
 
@@ -17,12 +20,34 @@ from rasterio.warp import Resampling, reproject
 from scipy import ndimage
 
 
+def _anchor(g: dict) -> float:
+    return float(g.get("anchor", g["res"]))
+
+
+def grid_area(g: dict) -> tuple[float, float, float, float]:
+    """Pixel-area bounds (left, bottom, right, top) of grid ``g``."""
+    a = _anchor(g)
+    left = g["e0"] - a / 2
+    top = g["n0"] + g["size_z"] + a / 2
+    rows, cols = grid_shape(g)
+    return left, top - rows * g["res"], left + cols * g["res"], top
+
+
 def grid_transform(g: dict) -> Affine:
-    return Affine(g["res"], 0.0, g["e0"], 0.0, -g["res"], g["n0"] + g["size_z"])
+    left, _, _, top = grid_area(g)
+    return Affine(g["res"], 0.0, left, 0.0, -g["res"], top)
 
 
 def grid_shape(g: dict) -> tuple[int, int]:
     return int(round(g["size_z"] / g["res"])), int(round(g["size_x"] / g["res"]))
+
+
+def pixel_to_world(g: dict, core: dict, col: np.ndarray, row: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """Godot (x, z) of sample (col, row) of grid ``g``; ``core`` defines E0/N0."""
+    left, _, _, top = grid_area(g)
+    e = left + (np.asarray(col, float) + 0.5) * g["res"]
+    n = top - (np.asarray(row, float) + 0.5) * g["res"]
+    return e - core["e0"], -(n - core["n0"])
 
 
 def mosaic_to_grid(paths: list[Path], g: dict, crs: str, resampling: Resampling,
@@ -57,10 +82,9 @@ def fill_nodata(a: np.ndarray) -> np.ndarray:
 
 
 def world_to_pixel(g: dict, e: np.ndarray, n: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Fractional pixel coordinates (col, row) of projected points (cell-centre convention)."""
-    col = (e - g["e0"]) / g["res"] - 0.5
-    row = (g["n0"] + g["size_z"] - n) / g["res"] - 0.5
-    return col, row
+    """Fractional sample coordinates (col, row) of projected points (E, N)."""
+    left, _, _, top = grid_area(g)
+    return (e - left) / g["res"] - 0.5, (top - n) / g["res"] - 0.5
 
 
 def sample_bilinear(a: np.ndarray, g: dict, e: np.ndarray, n: np.ndarray) -> np.ndarray:

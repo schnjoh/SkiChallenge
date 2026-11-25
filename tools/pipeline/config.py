@@ -31,9 +31,9 @@ FINISH_ALTITUDE_M = 805.0
 
 # --- Extent ----------------------------------------------------------------
 CORE_MARGIN_M = 300.0  # margin around the race line for the playable 1 m terrain
-FAR_MARGIN_M = 3000.0  # margin of the low-res far-terrain ring
+FAR_MARGIN_REGIONS = 3  # far ring = core extended by this many Terrain3D regions per side
 CORE_RES_M = 1.0  # game heightmap resolution
-FAR_RES_M = 5.0
+FAR_RES_M = 4.0  # divides the region size -> far vertices coincide with core vertices
 SPLAT_RES_M = 1.0
 ORTHO_RES_M = 0.5  # downloaded orthophoto resolution
 TERRAIN3D_REGION_M = 1024  # core extent is padded to a multiple of this
@@ -64,3 +64,11 @@ SECTION_WIDTHS_M = {
 }
 LINE_SPACING_M = 2.0  # spacing of the exported race line
 LINE_SMOOTH_SIGMA_M = 10.0
+
+# Sections on forest roads: stronger smoothing to round road cuts into a piste plane.
+ROAD_SECTIONS = ("Brückenschuss", "Gschöss")
+ROAD_SMOOTH_SIGMA_M = 5.0
+FINISH_RUNOUT_M = 120.0  # corridor/piste continues past the finish line (finish area)
+
+# Terrain3D texture slots (control map base/overlay ids)
+TEX_SNOW, TEX_PISTE, TEX_FOREST, TEX_ROCK = 0, 1, 2, 3

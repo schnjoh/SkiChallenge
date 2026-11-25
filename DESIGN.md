@@ -57,12 +57,16 @@ tools/pipeline (Python, rasterio/GDAL)          game/ (Godot 4.7, GDScript stati
   minus `origin_height` (Metadaten), Ursprung = SW-Ecke des Ausschnitts → alle Werte in `meta.json`.
 - **Abbildung Bild ↔ Welt (verbindlich):** `world = (E − E0, h − H0, −(N − N0))` mit (E0, N0) = SW-Ecke
   des Kern-Ausschnitts in EPSG:31255 (auf ganze Meter gerundet), H0 = `origin_height` (= 0, also echte
-  Meereshöhe als Y). Heightmap-Pixel = **Zellmittelpunkte**; Pixel (col, row) mit row 0 = Nordrand liegt bei
-  `x = col·Δ + Δ/2`, `z = −(rows − row)·Δ + Δ/2`. Terrain3D-Import: Image vertikal unverändert (row 0 = Norden
-  = kleinstes z), Position `(0, 0, −rows·Δ)`. GUT-Test prüft Start/Mausefalle/Ziel gegen bekannte EPSG:31255-Punkte.
+  Meereshöhe als Y). Heightmap-Samples sind **Vertices** (wie Terrain3D, empirisch geprüft): Sample (col, row),
+  row 0 = Norden, liegt bei `x = world_min_x + col·Δ`, `z = world_min_z + row·Δ` (Kern: x = 0…3071,
+  z = −3072…−1). Terrain3D-Import: `import_images([h, control, color], Vector3(world_min_x, 0, world_min_z), 0, 1)`.
+  Dreiecksteilung jeder Zelle entlang (x, z)→(x+1, z+1) (aus `bake_mesh` gemessen) → `HeightField`.
+  Das 0,5-m-Hilfsraster ist so verankert, dass jeder 1-m-Vertex genau 2×2 Halbmeter-Samples mittelt.
+  GUT-Test prüft den Startpunkt gegen bekannte EPSG:31255-Koordinaten.
 - **Kern-Ausschnitt:** BBox der OSM-Linie + 300 m Rand, Höhen 1 m (aus 50 cm gemittelt; 0,5 m `vertex_spacing`
   nur bei Performance-Reserve), Splat/Textur 1 m.
-- **Fernbereich:** Ring bis ~3 km um die Strecke aus WCS `resx=5` (5 m), eigenes Low-Res-Chunk-Mesh mit
+- **Fernbereich:** Kern + 3 Regionen (3072 m) je Seite = 9216 m, 4 m Raster (Vertices fallen auf Kern-Vertices),
+  eigenes Low-Res-Chunk-Mesh mit
   Schürzen (2–5 m nach unten), im Kernbereich ausgespart bzw. 1–2 m tiefer gelegt gegen Z-Fighting.
   Physik nutzt nur den Kern. Dahinter Horizont/Berge über Sky + Nebel.
 - **Schneeoberfläche aus Sommer-DGM:** im Pistenkorridor Mikrorelief glätten (Gauß σ ≈ 1,5 m), Forststraßen
@@ -73,7 +77,8 @@ tools/pipeline (Python, rasterio/GDAL)          game/ (Godot 4.7, GDScript stati
   Höhe = Wert, außerhalb Korridor + 4 m; Ausdünnung über Grafikeinstellung.
 - Dateien in `game/data/streif/`: `meta.json`, `height.r32` (roh float32, Größe in meta.json; Godot lädt per
   `FileAccess` + `Image.create_from_data(FORMAT_RF)`), `far_height.r32`, `jumps.json`,
-  `splat.png` (RGBA = Schnee/Piste/Wald/Fels), `ortho.jpg`, `trees.bin` (x,z,höhe), `line.json`
+  `control.r32` (Terrain3D-Control-Map uint32: Basis-ID<<27 | Overlay-ID<<22 | Blend<<14; IDs 0 Schnee,
+  1 Piste, 2 Wald, 3 Fels), `colormap.jpg` (Import „keep“), `trees.bin` (x,z,höhe), `buildings.json`, `line.json`
   (OSM-Linie, Godot-Koordinaten), `gates.json` (editierbar), `sections.json`.
 
 ### 4.2 Gelände

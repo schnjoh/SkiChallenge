@@ -1,4 +1,7 @@
-"""Render pipeline preview images to docs/img/ for visual inspection."""
+"""Render pipeline preview images to docs/img/ for visual inspection.
+
+Vertex convention: core sample (col, row) = world (x, z + size_z), so x/scale is exact.
+"""
 from __future__ import annotations
 
 import numpy as np
@@ -17,7 +20,7 @@ def main(scale: int = 2) -> None:
     gy, gx = np.gradient(h)
     shade = np.clip(0.5 + (gx * -0.7 + gy * 0.7) * 0.6, 0, 1)
     hs = Image.fromarray((shade * 255).astype(np.uint8)).convert("RGB")
-    splat = Image.open(config.OUT / "splat.png").convert("RGBA")
+    splat = Image.open(config.RAW / "derived" / "splat.png").convert("RGBA")
     sp = np.asarray(splat).astype(np.float32) / 255
     pal = np.array([[235, 240, 250], [120, 170, 255], [30, 110, 50], [130, 110, 90]], np.float32)
     col = np.einsum("hwk,kc->hwc", sp, pal)
@@ -51,8 +54,12 @@ def main(scale: int = 2) -> None:
     prof = Image.new("RGB", (W, H), "white")
     d = ImageDraw.Draw(prof)
     s, y = line[:, 3], line[:, 1]
-    sx = lambda v: 40 + v / s[-1] * (W - 60)
-    sy = lambda v: H - 30 - (v - 780) / (1700 - 780) * (H - 60)
+
+    def sx(v: float) -> float:
+        return 40 + v / s[-1] * (W - 60)
+
+    def sy(v: float) -> float:
+        return H - 30 - (v - 780) / (1700 - 780) * (H - 60)
     d.line([(sx(a), sy(b)) for a, b in zip(s, y)], fill=(200, 0, 0), width=2)
     for sec in secs:
         i = int(np.argmin(np.abs(s - sec["s"])))

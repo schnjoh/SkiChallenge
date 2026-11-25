@@ -45,10 +45,12 @@ Lizenzen: `CREDITS.md`. Dieses Dokument ersetzt den ursprünglichen Auftrag voll
 - **Alle Handling-Werte** nur in `SkiTuning` (`res://resources/ski_tuning.tres`), live änderbar im
   Debug-Menü **F1**, Presets speicherbar (User-Presets als JSON in `user://presets/`).
 - Koordinaten (verbindlich): 1 Einheit = 1 m, `x = E − E0`, `y = Höhe ü. A.`, `z = −(N − N0)`,
-  EPSG:31255, E0/N0 = SW-Ecke des Kerns (`meta.json`). Heightmap-Pixel = Zellmitte, Zeile 0 = Norden.
+  EPSG:31255 (`meta.json`). Heightmap-Samples = **Vertices** wie Terrain3D: (col,row) bei
+  `(world_min_x + col·res, world_min_z + row·res)`, Zeile 0 = Norden; Kern x 0…3071, z −3072…−1.
+  Dreiecksdiagonale (x,z)→(x+1,z+1); Physik-Höhen nur über `HeightField`.
 - Daten in `game/data/streif/`: `meta.json`, `height.r32` (float32, 3072², 1 m), `far_height.r32`
-  (5 m, 8 km), `line.json` (x,y,z,s), `sections.json`, `line_stats.json`, `trees.bin` (x,z,h float32),
-  `splat.png` (R Schnee, G Piste, B Wald, A Fels), `colormap.jpg`, `buildings.json`,
+  (4 m, 9216 m), `line.json` (x,y,z,s), `sections.json`, `line_stats.json`, `trees.bin` (x,z,h float32),
+  `control.r32` (Terrain3D-Control-Map, IDs 0 Schnee/1 Piste/2 Wald/3 Fels), `colormap.jpg`, `buildings.json`,
   später `gates.json`, `racing_line.json`, `jumps.json` (alle editierbar).
 
 ## Phasen
@@ -100,7 +102,7 @@ cd game && godot                                            # Spiel starten
 python3 -m venv tools/.venv && tools/.venv/bin/pip install -r tools/requirements.txt
 tools/.venv/bin/python tools/pipeline/run_all.py            # komplette Pipeline inkl. Selbstprüfung
 tools/.venv/bin/python tools/pipeline/preview.py            # Vorschaubilder → docs/img/
-tools/.venv/bin/ruff check tools/pipeline --select E,F,W --line-length 110   # Python-Lint
+tools/.venv/bin/ruff check tools/pipeline --select E,F,W --line-length 120   # Python-Lint
 ```
 
 ## Code-Regeln
@@ -109,3 +111,7 @@ tools/.venv/bin/ruff check tools/pipeline --select E,F,W --line-length 110   # P
 - Pipeline-Skripte reproduzierbar (Parameter in `tools/pipeline/config.py`), idempotent, cachen
   Downloads, drosseln Anfragen an Landesserver (2 s), Overpass mit Mirror-Fallback.
 - Neue Pipeline-Ausgaben → Prüfung in `check_outputs.py` ergänzen.
+- Rohdaten (`*.r32`, `*.json`, `*.bin`, `colormap.jpg`) lädt das Spiel per `FileAccess`/`Image.load_from_file`
+  → im Export-Preset als Nicht-Ressourcen einschließen (`data/*`). Bilder, die roh bleiben sollen,
+  bekommen eine `.import` mit `importer="keep"`.
+- Terrain3D-Probe-Skripte (headless) müssen im ersten `_process`-Frame arbeiten, nicht in `_init` (hängt sonst).

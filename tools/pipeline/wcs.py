@@ -1,17 +1,25 @@
-"""Minimal WCS 1.0.0 GetCoverage client (Land Tirol ArcGIS services)."""
+"""Minimal WCS 1.0.0 GetCoverage client (Land Tirol ArcGIS services) with validated cache."""
 from __future__ import annotations
 
 from pathlib import Path
 
 import rasterio
+from pyproj import CRS
 
 from common import http_get
 
+Bbox = tuple[float, float, float, float]
 
-def get_coverage(base: str, coverage: str, crs: str, bbox: tuple[float, float, float, float],
-                 res: float, out: Path, expect_bands: int | None = None) -> Path:
-    """Download one GeoTIFF tile unless a valid cached copy exists."""
-    if out.exists() and _valid(out, crs, expect_bands):
+
+def tile_name(prefix: str, bbox: Bbox, res: float) -> str:
+    """Cache file name that encodes bbox and resolution (changed extent -> new file)."""
+    return f"{prefix}_{bbox[0]:.2f}_{bbox[1]:.2f}_{bbox[2]:.2f}_{bbox[3]:.2f}_r{res:g}.tif"
+
+
+def get_coverage(base: str, coverage: str, crs: str, bbox: Bbox, res: float, out: Path,
+                 expect_bands: int = 1) -> Path:
+    """Download one GeoTIFF tile unless a cached copy with matching CRS/bounds/res exists."""
+    if out.exists() and valid(out, crs, bbox, res, expect_bands):
         return out
     params = {
         "service": "WCS", "version": "1.0.0", "request": "GetCoverage", "coverage": coverage,
@@ -19,40 +27,41 @@ def get_coverage(base: str, coverage: str, crs: str, bbox: tuple[float, float, f
         "format": "GeoTIFF",
     }
     data = http_get(base, params=params, timeout=600)
-    if not data.startswith((b"II*\x00", b"MM\x00*")):
+    if not data.startswith((b"II*\x00", b"MM\x00*")):  # ArcGIS returns XML errors with HTTP 200
         raise RuntimeError(f"WCS returned no TIFF for {coverage} {bbox}: {data[:300]!r}")
     out.parent.mkdir(parents=True, exist_ok=True)
     tmp = out.with_suffix(".part")
     tmp.write_bytes(data)
-    if not _valid(tmp, crs, expect_bands):
-        raise RuntimeError(f"invalid GeoTIFF from WCS: {tmp}")
+    if not valid(tmp, crs, bbox, res, expect_bands):
+        raise RuntimeError(f"WCS tile does not match the request: {tmp}")
     tmp.replace(out)
     return out
 
 
-def _valid(path: Path, crs: str, expect_bands: int | None) -> bool:
+def valid(path: Path, crs: str, bbox: Bbox, res: float, expect_bands: int) -> bool:
     try:
         with rasterio.open(path) as ds:
-            ok = ds.width > 0 and ds.height > 0
-            if ds.crs is not None and ds.crs.to_epsg() is not None:
-                ok = ok and f"EPSG:{ds.crs.to_epsg()}" == crs
-            if expect_bands is not None:
-                ok = ok and ds.count >= expect_bands
-            return ok
+            if ds.count < expect_bands or ds.crs is None:
+                return False
+            # ArcGIS WKTs carry extra datum details, so compare the identified EPSG code
+            if CRS.from_wkt(ds.crs.to_wkt()).to_epsg(min_confidence=20) != CRS.from_user_input(crs).to_epsg():
+                return False
+            if abs(ds.res[0] - res) > 1e-6 or abs(ds.res[1] - res) > 1e-6:
+                return False
+            b = ds.bounds
+            return all(abs(u - v) <= res / 2 for u, v in zip((b.left, b.bottom, b.right, b.top), bbox))
     except Exception:
         return False
 
 
-def tiles(e0: float, n0: float, size_x: float, size_z: float, tile: float,
-          shift: float = 0.0) -> list[tuple[int, int, tuple[float, float, float, float]]]:
-    """Split an extent into tiles; ``shift`` offsets the bbox (pixel-centre alignment)."""
+def tiles(area: Bbox, tile: float) -> list[tuple[int, int, Bbox]]:
+    """Split a pixel-area bbox (left, bottom, right, top) into tiles of at most ``tile`` m."""
+    left, bottom, right, top = area
     out = []
-    nx, nz = int(-(-size_x // tile)), int(-(-size_z // tile))
+    nx = int(-(-(right - left) // tile))
+    nz = int(-(-(top - bottom) // tile))
     for j in range(nz):
         for i in range(nx):
-            x0 = e0 + i * tile + shift
-            y0 = n0 + j * tile + shift
-            x1 = min(e0 + size_x, e0 + (i + 1) * tile) + shift
-            y1 = min(n0 + size_z, n0 + (j + 1) * tile) + shift
-            out.append((i, j, (x0, y0, x1, y1)))
+            out.append((i, j, (left + i * tile, bottom + j * tile,
+                               min(right, left + (i + 1) * tile), min(top, bottom + (j + 1) * tile))))
     return out
