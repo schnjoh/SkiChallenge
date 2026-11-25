@@ -95,9 +95,10 @@ func test_carve_radius_follows_sidecut() -> void:
 
 
 func test_liftoff_at_crest_and_soft_landing() -> void:
-	# 15 % slope, then a sudden 50 % slope beyond z < 0 (convex kink)
+	# 15 % slope, then a sudden 35 % slope beyond z < 0 (convex kink). Expected: ~1 s flight,
+	# landing ~9 deg against the slope -> ~1 m equivalent drop (a 50 % slope would give ~3 m = crash).
 	var hf: HeightField = _surface(func(_x: float, z: float) -> float:
-		return 0.15 * z if z >= 0.0 else 0.5 * z, 600.0, 1.0)
+		return 0.15 * z if z >= 0.0 else 0.35 * z, 600.0, 1.0)
 	var phys: SkiPhysics = SkiPhysics.new(SkiTuning.new(), hf)
 	phys.reset(Vector3(0.0, 0.0, 60.0), 0.0, 25.0)
 	_run(phys, SkiInput.make(0.0, true), 6.0)  # ~2.4 s run-up + ~1.8 s flight
