@@ -8,10 +8,9 @@ __pycache__/
 *.pyc
 # Godot
 game/.godot/
-game/.import/
 *.translation
 export/
 build/
 # User-local
-game/user_presets/
 .claude/settings.local.json
+test_results.xml

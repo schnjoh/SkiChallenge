@@ -19,9 +19,9 @@ HUD und Kamera orientieren sich nur funktional an `reference/` (was angezeigt wi
 | Start / Ziel / Δh | 1665 m / 805 m / 860 m | DGM ±15 m (Starthaus steht erhöht) |
 | Max. Gefälle | 85 % (40,4°), Mausefalle | DGM 50 cm sollte ≥ 70 % zeigen; sonst Schneeform nachmodellieren |
 | Mittleres Gefälle | 27 % | ±3 Prozentpunkte |
-| Siegerzeit (volle Strecke) | 1:52–1:57, Rekord 1:51,58 | **Bot: 1:46–2:05 (±10 % um ~1:55)** |
+| Siegerzeit (volle Strecke) | 1:52–1:57, Rekord 1:51,58 | **Bot: 1:50–2:00**, skaliert mit Spiel-Länge/3312 m; zusätzlich Ø-Tempo 101–107 km/h |
 | Ø-Tempo | 101–107 km/h | Plausibilitätscheck Bot |
-| Höchsttempo | 140–145 km/h im Zielschuss, Rekord 153 | Bot ≤ 155 km/h |
+| Höchsttempo | 140–145 km/h im Zielschuss, Rekord 153 | Bot ≤ 153 km/h |
 | 100 km/h nach dem Start | nach ≈ 8,5 s | Physik-Test |
 | Mausefalle-Sprung | 50–60 m bei ~105–120 km/h | Bot-/Physik-Test |
 | Zielsprung | 50–60 m | Bot |
@@ -55,22 +55,41 @@ tools/pipeline (Python, rasterio/GDAL)          game/ (Godot 4.7, GDScript stati
 - Projekt-CRS der Pipeline: **EPSG:31255** (MGI / Austria GK Central, Zone M31 der Tiroler
   ALS-Daten; Orthofotos werden aus EPSG:31254 umprojiziert, siehe `docs/data-sources.md`). Godot: 1 Einheit = 1 m, **+X = Ost, −Z = Nord, Y = Höhe ü. A.**
   minus `origin_height` (Metadaten), Ursprung = SW-Ecke des Ausschnitts → alle Werte in `meta.json`.
-- Ausschnitt: Bounding Box der OSM-Linie + 300 m Rand. Auflösung im Spiel: Höhen 1 m (aus 50 cm
-  gemittelt; 50 cm nur, wenn Performance reicht), Textur/Splat 1 m (Ortho bis 20 cm im Nahbereich optional).
-- Dateien in `game/data/streif/`: `meta.json`, `height.exr` (32-bit float) bzw. Terrain3D-Regionen,
+- **Abbildung Bild ↔ Welt (verbindlich):** `world = (E − E0, h − H0, −(N − N0))` mit (E0, N0) = SW-Ecke
+  des Kern-Ausschnitts in EPSG:31255 (auf ganze Meter gerundet), H0 = `origin_height` (= 0, also echte
+  Meereshöhe als Y). Heightmap-Pixel = **Zellmittelpunkte**; Pixel (col, row) mit row 0 = Nordrand liegt bei
+  `x = col·Δ + Δ/2`, `z = −(rows − row)·Δ + Δ/2`. Terrain3D-Import: Image vertikal unverändert (row 0 = Norden
+  = kleinstes z), Position `(0, 0, −rows·Δ)`. GUT-Test prüft Start/Mausefalle/Ziel gegen bekannte EPSG:31255-Punkte.
+- **Kern-Ausschnitt:** BBox der OSM-Linie + 300 m Rand, Höhen 1 m (aus 50 cm gemittelt; 0,5 m `vertex_spacing`
+  nur bei Performance-Reserve), Splat/Textur 1 m.
+- **Fernbereich:** Ring bis ~3 km um die Strecke aus WCS `resx=5` (5 m), eigenes Low-Res-Chunk-Mesh mit
+  Schürzen (2–5 m nach unten), im Kernbereich ausgespart bzw. 1–2 m tiefer gelegt gegen Z-Fighting.
+  Physik nutzt nur den Kern. Dahinter Horizont/Berge über Sky + Nebel.
+- **Schneeoberfläche aus Sommer-DGM:** im Pistenkorridor Mikrorelief glätten (Gauß σ ≈ 1,5 m), Forststraßen
+  (Brückenschuss/Gschöss) als Pistenebene ausrunden, Schneeauflage +0,3 m. Außerhalb unverändert.
+- **Pistenkorridor:** aus OSM-Linie + Breite je Abschnitt (`sections.json`, Default 30 m, Gleitstücke 15–20 m,
+  Zielhang 60 m). Quelle für Splat, B-Netze, Torpositionen und Baumfreistellung.
+- **Bäume:** Vegetationshöhe = DOM − DGM, Maske > 3 m, lokale Maxima (Fenster 3 m) als Baumspitzen,
+  Höhe = Wert, außerhalb Korridor + 4 m; Ausdünnung über Grafikeinstellung.
+- Dateien in `game/data/streif/`: `meta.json`, `height.r32` (roh float32, Größe in meta.json; Godot lädt per
+  `FileAccess` + `Image.create_from_data(FORMAT_RF)`), `far_height.r32`, `jumps.json`,
   `splat.png` (RGBA = Schnee/Piste/Wald/Fels), `ortho.jpg`, `trees.bin` (x,z,höhe), `line.json`
   (OSM-Linie, Godot-Koordinaten), `gates.json` (editierbar), `sections.json`.
 
 ### 4.2 Gelände
 Primär **Terrain3D** (GDExtension, LOD-Clipmap, Splat/Control-Map). Fallback: eigene Chunk-Meshes
 (64×64 m) mit 3 LOD-Stufen aus derselben Heightmap. Kollision: Physik fragt die Höhe/Normale
-analytisch aus der Heightmap ab (bilinear), unabhängig vom Renderer. Dadurch ist die Physik headless
+analytisch aus der Heightmap ab, **mit derselben Dreiecksteilung wie
+Terrain3D** (kein bilinear), damit gezeichnete und physikalische Oberfläche übereinstimmen. Dadurch ist die Physik headless
 testbar und deterministisch. Modellierte Schneeformen (Sprungkanten) werden als Höhen-Offsets in die
 Heightmap gebacken (Pipeline + `jumps.json`), sodass Render und Physik identisch bleiben.
 
 ### 4.3 Physikmodell (eigenes, kein Ragdoll)
 Zustand: Position, Geschwindigkeit (3D), Ski-Richtung (Heading), Kantwinkel, Haltung (Hocke 0–1),
-Bodenkontakt, Fluglage. Schritt mit fester Rate 120 Hz.
+Bodenkontakt, Fluglage. Physik-Schritt fest 120 Hz
+(`physics/common/physics_ticks_per_second=120`), Bot/Tests rufen `step(dt)` direkt auf (deterministisch).
+Startwerte (tunebar): Masse 95 kg inkl. Material, ρ = 1,05 kg/m³, μ_Gleit = 0,03,
+μ_Drift = 0,35, Taillierungsradius R_sc = 50 m → Kurvenradius R = R_sc·cos(Kantwinkel).
 - **Schwerkraft** am Hang: Hangabtriebskomponente aus der Normale.
 - **Ski-Querführung:** Geschwindigkeit wird in Ski-längs/quer zerlegt. Carven (|Lenken| klein,
   Kantwinkel aufgebaut): Querkomponente stark gedämpft → Kurve folgt Radius aus Kantwinkel
@@ -78,13 +97,14 @@ Bodenkontakt, Fluglage. Schritt mit fester Rate 120 Hz.
   Reibung → Tempoverlust.
 - **Reibung:** Gleitreibung μ (Schnee) längs, separater Drift-Reibungsbeiwert quer.
 - **Luftwiderstand:** F = ½ρ·cdA·v², cdA interpoliert zwischen Hocke (~0,15 m²) und aufrecht (~0,6 m²).
-- **Sprünge:** Abheben, wenn die Normalkraft ≤ 0 (Gelände fällt schneller ab als Flugbahn).
+- **Sprünge:** Abheben, wenn die erforderliche Normalkraft < 0 für ≥ 2 Schritte und die Flugbahn ≥ 3 cm
+  über dem Gelände liegt (Hysterese gegen Heightmap-Rauschen), Mindestflugzeit 0,1 s.
   Vorspringen (Taste) gibt einen Impuls vor der Kante für einen kürzeren, flacheren Sprung. Flug: Gravitation +
   Luftwiderstand, Lage per Eingabe leicht korrigierbar. Landung: Aufprallgeschwindigkeit normal zum Hang
   → äquivalente Fallhöhe; > Schwelle oder Lage-Fehler > Schwelle → **Sturz**.
 - **Überlast:** g-Kraft aus Normalkraft; über Schwelle für t > Δt → Sturz.
 - Alle Beiwerte in `SkiTuning` (`res://resources/ski_tuning.tres`), F1-Menü mit Reglern, Presets
-  in `user://presets/*.tres` + mitgelieferte Presets in `res://resources/presets/`.
+  als **JSON** in `user://presets/*.json` (kein .tres aus user://, Script-Injektion) + mitgelieferte Presets in `res://resources/presets/`.
 
 ### 4.4 Steuerung
 | Aktion | Tastatur | Gamepad |
@@ -111,12 +131,22 @@ damit später ein geriggtes Modell eingesetzt werden kann.
 ### 4.7 Strecke & Rennen
 - `gates.json`: Liste von Toren {id, position links/rechts (x,z), Typ}. Erzeugt per Skript aus der
   Rennlinie (Abstand ~60–120 m, dichter in Kurven), im F2-Editor per Maus verschiebbar und speicherbar.
-- Torfehler (Tor nicht zwischen den Stangen passiert) → **DSQ**.
+- Tor-Logik: Tor = Segment links–rechts in XZ, Mindestbreite 8 m. Durchfahrt = Schnitt des Bewegungs-
+  segments (Position vor/nach Physikschritt, XZ-Projektion, auch in der Luft) mit dem Torsegment.
+  Tore in fester Reihenfolge; ist die Streckenposition s > s_Tor + 25 m ohne Durchfahrt → Torfehler → **DSQ**.
+  Zwischen-/Zielzeiten werden innerhalb des Schritts linear interpoliert.
+- Kollision Netze/Bäume in der reinen Physik: Netze als 2D-Polylinien, Bäume als Kreise (r = 0,4 m),
+  im Raster indiziert; Kontakt → Abprall mit Energieverlust bzw. Sturz bei > 40 km/h quer.
 - Fangnetze (A-Netze: hohe Netze an Gefahrenstellen; B-Netze: Begrenzung), Zäune, Starthaus, Zielraum
   aus Primitiven/CC0-Modellen. Netze = Kollision → Sturz/Abprall.
 - Zeitmessung: Start-Lichtschranke, Zwischenzeiten, Ziel; Rückstand zur Bestzeit.
-- **Validierungs-Bot:** Pure-Pursuit-Autopilot auf der Rennlinie, headless, Ergebnis in
-  `docs/validation.md`. Bedingungen: alle Tore, kein Sturz, Zeit 1:46–2:05.
+- **Rennlinie:** OSM-Linie ist Pisten-*Mitte*. Rennlinie = Optimierung im Korridor (Torpositionen, Kurven
+  innen anschneiden, Kurvenradius ≥ Ski-Radius), gespeichert in `racing_line.json`, im F2-Editor korrigierbar.
+- **Validierungs-Bot:** Pure-Pursuit-Lenkung auf der Rennlinie + Haltungslogik (Hocke Standard, aufrecht/
+  Bremsen nach Tempo-Zielprofil, Vorspringen 0,3 s vor in `jumps.json` markierten Kanten), headless,
+  Ergebnis in `docs/validation.md`. Bedingungen: alle Tore, kein Sturz, Zeit 1:50–2:00 (× Länge/3312),
+  Ø 101–107 km/h, Spitze ≤ 153 km/h, Abschnitts-Tempi ±15 % (Research §6), Mausefalle/Zielsprung
+  40–65 m, Spitzen-g ≤ 3,8, zwei Läufe zeitgleich (Determinismus).
 
 ### 4.8 Spielablauf (Phase 5)
 Hauptmenü → Training (freies Fahren, Neustart an Abschnitten) / Rennen → Ergebnis →

@@ -26,7 +26,7 @@ Spec: `DESIGN.md`. Recherche: `docs/streif-research.md`, `docs/data-sources.md`.
 # Godot 4.7.2 liegt in ~/.local/bin/godot
 cd game && godot --headless --import                        # Import / Klassen-Cache
 cd game && godot --headless -s addons/gut/gut_cmdln.gd      # alle GUT-Tests
-cd game && godot --headless --quit-after 60                 # Start-Smoketest (keine Fehler erlaubt)
+cd game && godot --headless --quit-after 60 2>&1 | tee /tmp/smoke.log; ! grep -E "ERROR|WARNING" /tmp/smoke.log   # Start-Smoketest
 cd game && godot                                            # Spiel starten
 # Python-Pipeline
 python3 -m venv tools/.venv && tools/.venv/bin/pip install -r tools/requirements.txt

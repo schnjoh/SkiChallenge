@@ -24,7 +24,7 @@ Stand: 25.11.2026. Alle Zahlen mit Quelle. Wenn Quellen sich widersprechen, steh
 | Größe | Wert | Quelle / Anmerkung |
 |---|---|---|
 | Länge | **3312 m** | [HKR], [WP-DE], [WP-EN], [AF]. OSM-Linie Start bis Zielsprung/Zielraum: ca. 3090 m horizontal, ganze Relation bis ins Tal 3373 m [OSM] |
-| Starthöhe | **1665 m** | [HKR], [WP-DE], [VIE]. DEM am OSM-Startpunkt: 1640 m [DEM], weil das 25-m-Raster glättet und das Starthaus erhöht steht |
+| Starthöhe | **1665 m** | [HKR], [WP-DE], [VIE]. DEM am OSM-Startpunkt: 1640 m [DEM], weil das 25-m-Raster glättet; das 50-cm-DGM liefert ~1663 m (siehe data-sources.md) |
 | Zielhöhe | **805 m** | [HKR], [WP-DE], [AF] |
 | Höhendifferenz | **860 m** | [HKR], [WP-EN] |
 | Maximalgefälle | 85 % = **40,4°** | [HKR], [WP-DE], [WP-EN], [FS]. [BZ] nennt 86 % |
@@ -159,7 +159,7 @@ Zielwerte für Physik und Bot-Validierung, volle Strecke mit 3312 m und 860 Hm:
 - **Durchschnittstempo:** 101–107 km/h (3312 m / 112–118 s).
 - **Höchsttempo:** typisch 140–145 km/h im Zielschuss. Harte Obergrenze ca. 153 km/h, nur bei extremen Bedingungen.
 - **Zwischenwerte als Checkpoints:** 100 km/h nach 8,5 s und 160 m. Mausefalle-Absprung 105–120 km/h. Karussell 60–80 km/h. Steilhang 90–100 km/h. Gleitstücke (Brückenschuss, Gschöss) 90–110 km/h. Alte Schneise ~120 km/h. Seidlalm 80–90 km/h. Oberhausberg 60–80 km/h, das langsamste Stück. Hausbergkante ~100 km/h. Traverse 90–105 km/h. Zielsprung 120–145 km/h.
-- **Sprungweiten:** Mausefalle 50–60 m Standard, bis 80 m nur bei Fehlabstimmung. Zielsprung 40–60 m (bis 70–80 m). Kleinere Sprünge (Gschöss, Alte Schneise, Seidlalm, Hausbergkante) 20–40 m (Schätzung).
+- **Sprungweiten:** Mausefalle 50–60 m Standard, bis 80 m nur bei Fehlabstimmung. Zielsprung 50–60 m Spielziel (Quellen 50–80 m). Kleinere Sprünge (Gschöss, Alte Schneise, Seidlalm, Hausbergkante) 20–40 m (Schätzung).
 - **Lasten:** Kurven und Kompressionen 3,0–3,5 g als Spitzenwert (Karussell 3,1 g, Hausberg-Kompression 3,5 g). Sturzschwelle im Spiel knapp darüber ansetzen.
 - **Landehärte:** Äquivalente Fallhöhe unter 2 m ist unkritisch, ab 2,5 m gefährlich [HKR-Inkl]. Das eignet sich direkt als Sturz- oder Strafkriterium (2,5 m entsprechen v_vertikal ≈ 7 m/s).
 - **Gefälle-Validierung des Terrains:** Max. 85 % in der Mausefalle, 72 % Steilhang, 70 % Hausbergkante, 63 % Zielschuss, 51 % Starthang, Ø 27 %. Ein 25-m-DEM liefert nur ca. 45–55 %. Für die Schlüsselstellen das Gelände lokal nachmodellieren (Kanten schärfen) oder ein höher aufgelöstes DGM verwenden, z. B. das österreichische ALS-DGM 1 m / Tirol 0,5 m (data.gv.at).

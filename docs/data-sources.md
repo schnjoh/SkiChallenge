@@ -124,7 +124,7 @@ Die Way-Suche `way["piste:type"="downhill"]["name"~"Streif",i](47.40,12.33,47.46
 - Headless-Lauf (vorher einmal importieren, damit `class_name`-Cache und Imports existieren):
   ```bash
   godot --headless --path game --import
-  godot --headless --path game -d -s addons/gut/gut_cmdln.gd -gdir=res://tests -ginclude_subdirs -gexit -gjunit_xml_file=res://test_results.xml
+  godot --headless --path game -s addons/gut/gut_cmdln.gd   # Konfig aus game/.gutconfig.json; kein -d (hängt headless im Debugger)
   ```
   Exit-Code 0 bedeutet alle Tests grün, 1 bedeutet Fehler. Standardoptionen können in `res://.gutconfig.json` stehen (`-gconfig=` überschreibt, `-gprint_gutconfig_sample` zeigt ein Beispiel).
 
@@ -143,7 +143,7 @@ Die Way-Suche `way["piste:type"="downhill"]["name"~"Streif",i](47.40,12.33,47.46
 - Quaternius „Stylized Nature MegaKit“ (glTF/FBX/OBJ, Pine-Varianten): https://quaternius.com/packs/stylizednaturemegakit.html bzw. https://quaternius.itch.io/stylized-nature-megakit (der Standard-Zip ist gratis)
 - Quaternius „Textured LowPoly Trees“ (Pines): https://quaternius.itch.io/textured-lowpoly-trees
 - Kenney „Nature Kit“ (CC0): https://kenney.nl/assets/nature-kit
-- Kenney und itch.io bieten keine stabile Direkt-URL (der Download läuft über Button bzw. Hash-URL). Diese Pakete daher einmalig manuell laden und in `data/`/`reference/` ablegen.
+- Kenney und itch.io bieten keine stabile Direkt-URL (der Download läuft über Button bzw. Hash-URL). Diese Pakete daher einmalig manuell laden und in `data/raw/assets/` ablegen (gitignored; nur verarbeitete Assets nach `game/assets/`).
 
 **Sounds (Freesound, jeweils auf der Seite als „Creative Commons 0“ geprüft):**
 

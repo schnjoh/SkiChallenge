@@ -1,0 +1,15 @@
+{
+  "title": "Schussfahrt",
+  "sections": [
+    {"heading": "Engine & Werkzeuge", "entries": [
+      {"name": "Godot Engine 4.7.2", "license": "MIT", "url": "https://godotengine.org"},
+      {"name": "GUT – Godot Unit Test 9.7.1", "license": "MIT", "url": "https://github.com/bitwes/Gut"},
+      {"name": "Terrain3D 1.1.0", "license": "MIT", "url": "https://github.com/TokisanGames/Terrain3D"}
+    ]},
+    {"heading": "Geodaten", "entries": [
+      {"name": "Datenquelle: Land Tirol – data.tirol.gv.at (DGM/DOM 50 cm, Orthofoto)", "license": "CC BY 4.0", "url": "https://www.tirol.gv.at/data/"},
+      {"name": "© OpenStreetMap contributors", "license": "ODbL 1.0", "url": "https://www.openstreetmap.org/copyright"}
+    ]},
+    {"heading": "Assets", "entries": []}
+  ]
+}

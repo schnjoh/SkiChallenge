@@ -1,7 +1,7 @@
 # PROGRESS.md
 
 ## Stand
-- **Phase 0 – Design & Setup: abgeschlossen** (Review offen → siehe unten)
+- **Phase 0 – Design & Setup: abgeschlossen** (Review durchgeführt, Funde behoben; Push blockiert)
 - Phase 1 – Datenpipeline: als Nächstes
 
 ## Nächster Schritt
@@ -34,6 +34,13 @@ Phase 1: `tools/pipeline/config.py` (BBox aus OSM-Relation 12870777 + 300 m Rand
   stark entsättigt/schneegetönt, nicht 1:1 als Textur.
 - Bäume (Quaternius/Kenney) haben keine stabilen Direktlinks → eigener Low-Poly-Nadelbaum per
   Code/Primitiven als Standard; CC0-Modell optional.
+
+- Review Phase 0 umgesetzt: verbindliche Bild↔Welt-Formel, Fernbereich (5 m-Ring), Dreiecks-Sampling
+  wie Terrain3D, Abhebe-Hysterese, Tor-/DSQ-Logik, Physik-Startwerte, Bot-Kriterien (1:50–2:00 skaliert,
+  Ø-Tempo, Abschnittstempi, Determinismus), Heightmaps als roh float32 (`.r32`) statt EXR,
+  User-Presets als JSON, 120 Hz Physik + Jolt, MSAA aus, untypisierte Deklarationen = Fehler.
+- Repo-Name „SkiChallange“ bleibt (Vorgabe des Nutzers); der Name taucht nicht im Spiel auf.
+- Export-Ausschlüsse (GUT, Terrain3D csharp/extras) werden in Phase 6 mit den Export-Presets gesetzt.
 
 ## Offene Punkte / Blocker
 - GitHub-Repo `schnjoh/SkiChallange` existiert noch nicht → Push blockiert (SSH-Zugang ok).
