@@ -20,7 +20,8 @@ Exportierte Builds enthalten die Godot-Lizenz und Drittanbieter-Hinweise (`Engin
 | Land Tirol: DGM/DOM 50 cm (ALS), Orthofoto | CC BY 4.0 | "Datenquelle: Land Tirol – data.tirol.gv.at" |
 | OpenStreetMap (Pistenlinie, Relation 12870777) | ODbL 1.0 | "© OpenStreetMap contributors" |
 
-Aus OSM abgeleitete Dateien (`line.json`, `racing_line.json`, `gates.json`, `sections.json`) stehen als
+Aus OSM abgeleitete Dateien (`line.json`, `racing_line.json`, `gates.json`, `sections.json`, `jumps.json`,
+`line_stats.json`) stehen als
 abgeleitete Datenbank unter **ODbL 1.0** (Share-Alike).
 
 Konkret verwendete Datensätze (abgerufen 2026-11-25, Pipeline `tools/pipeline/`):
@@ -38,3 +39,10 @@ Konkret verwendete Datensätze (abgerufen 2026-11-25, Pipeline `tools/pipeline/`
 | Snow Field Aerial – Rob Tuytel (Poly Haven) | Terrain-Material „Waldboden mit Schnee“ | CC0 | https://polyhaven.com/a/snow_field_aerial |
 | Rock 032 – ambientCG | Terrain-Material „Fels“ | CC0 | https://ambientcg.com/view?id=Rock032 |
 | Horn-Koppe Snow – Grzegorz Wronkowski (Poly Haven) | Himmel/Umgebungslicht (HDRI, `sky_2k.hdr`) | CC0 | https://polyhaven.com/a/horn-koppe_snow |
+
+## Eigene Werke (Projekt)
+| Inhalt | Lizenz |
+|---|---|
+| Fahrer-, Baum-, Netz-, Tor-, Starthaus-, Zielbogen- und Zuschauermodelle (per Code aus Primitiven) | wie Projekt |
+| Sounds Wind, Kantenkratzen, Publikum, Jubel (prozedural im Spiel synthetisiert, `ride_audio.gd`) | wie Projekt |
+| Netz-Shader, Schnee-Glitzern (Injektion in den Terrain3D-Shader), Himmel-Shader | wie Projekt |

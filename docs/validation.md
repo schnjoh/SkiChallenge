@@ -37,73 +37,82 @@ Feste Kameras: Start, Mausefalle, Steilhang, Hausbergkante, Ziel, Übersicht
 5. Schachbrett statt Textur → nach Pipeline-Läufen fehlte der Reimport (`godot --headless --import`).
 6. HDRI-Waldhügel über den echten Bergen → eigener Sky-Shader, HDRI erst ab 12° Elevation.
 
-## 3. Performance-Stichprobe (Zielhardware Iris Xe, 1080p, volle Qualität, VSync aus)
+## 3. Performance (Zielhardware Intel Iris Xe, 1920×1080, VSync aus)
 
-| Ansicht | fps |
-|---|---|
-| Start | 49 |
-| Mausefalle | 51 |
-| Steilhang | 54 |
-| Hausbergkante | 54 |
-| Ziel | 60 |
-| Übersicht (650 m hoch) | 43 |
+Messung: `scenes/tools/perf_run.tscn` – das echte Spiel, der Bot fährt die ganze Strecke in Echtzeit
+(1:54 min), Frame-Zeiten je Abschnitt in `docs/img/perf_<preset>.txt`.
 
-Aufbau der Welt: ~2,5 s. Optimierung auf stabile 60 fps (mittlere Einstellungen) in Phase 6.
+| Preset (Einstellungen) | Ø fps | 1 %-Low | GPU Ø |
+|---|---|---|---|
+| niedrig (Skala 0,67 FSR, Sicht 0,5, Bäume 0,3, Schatten aus) | 101 | 58 | 9,5 ms |
+| **mittel** (Standard: Skala 0,8 FSR, Sicht 0,7, Bäume 0,5, Schatten mittel) | 60–74 | 40–45 | 13–16 ms |
+| hoch (Skala 1,0, Sicht 1,0, Bäume 1,0, Schatten hoch, MSAA 2×) | 44 | 29 | 22 ms |
+
+Befunde und Maßnahmen (Phase 6):
+1. GPU-gebunden; die Auflösungsskala wirkt kaum, der Sonnen-Schattenpass dominiert. „Mittel“: kein
+   Gelände-Eigenschatten, keine Baumschatten, eine Kaskade, Atlas 2048, Distanz 120 m, Clipmap 32.
+2. Skispur wurde pro Sample komplett neu gebaut → in Abschnitte zerlegt (konstante Kosten).
+3. Messungen streuen auf dem Laptop thermisch bedingt um ±15 % bei identischer Konfiguration.
+
+**Ergebnis:** Das Ziel „stabile 60 fps bei mittleren Einstellungen“ wird **nicht ganz** erreicht
+(Ø über 60, Einbrüche auf ~40–45 fps im unteren Streckenteil). Stabile 60 fps (1 %-Low 58) liefert das
+Preset „niedrig“. Weitere Hebel (offen): eigener, schlankerer Terrain-Shader (Terrain3D tastet pro Pixel
+4× Control-Map mit je zwei Materialien ab), Impostor-Bäume, statische Schattenkarte für das Gelände.
 
 ## 4. Validierungs-Bot (Phase 4)
 
 <!-- BOT-VALIDATION:BEGIN -->
 _Automatisch erzeugt von `game/scripts/tools/validate_track.gd` am 2026-11-25._
 
-**Ergebnis: bestanden** — Zeit 1:55.29, 41 Tore, 5 Zwischenzeiten.
+**Ergebnis: bestanden** — Zeit 1:54.34, 41 Tore, 5 Zwischenzeiten.
 
 | Prüfung | Bot | Ziel | |
 |---|---|---|---|
 | Ziel erreicht, kein Sturz | ja | ja | ✅ |
 | Alle Tore | 41/41 | alle | ✅ |
-| Zeit | 1:55.29 | 1:46.95–1:56.68 (1:50–2:00 × 0.972) | ✅ |
-| Ø-Tempo (3D-Länge) | 100.6 km/h | 101–107 km/h (±3 %) | ✅ |
+| Zeit | 1:54.34 | 1:46.95–1:56.68 (1:50–2:00 × 0.972) | ✅ |
+| Ø-Tempo (3D-Länge) | 101.4 km/h | 101–107 km/h | ✅ |
 | Netz-/Baumkontakte | 0 | 0 | ✅ |
-| Höchsttempo | 151.5 km/h | ≤ 153 km/h | ✅ |
-| Spitzen-g (Boden) | 3.55 g bei s=94 | ≤ 3,8 g | ✅ |
-| 100 km/h nach dem Start | 8.3 s (s=146 m) | ≈ 8,5 s | ✅ |
-| Sprung Mausefalle | 41 m bei 96 km/h, Landung 1.1 m | 40–65 m | ✅ |
-| Sprung Seidlalmsprung | 20 m bei 72 km/h, Landung 0.5 m | 15–45 m | ✅ |
-| Sprung Hausbergkante | 31 m bei 75 km/h, Landung 0.8 m | 15–45 m | ✅ |
-| Sprung Zielsprung | 49 m bei 126 km/h, Landung 0.5 m | 40–65 m | ✅ |
-| Tempo Mausefalle | Ø 117 (112–123) km/h | 105–120 km/h ±15 % | ✅ |
-| Tempo Karussell | Ø 65 (39–98) km/h | 60–80 km/h ±15 % | ✅ |
-| Tempo Steilhang | Ø 77 (46–94) km/h | 90–100 km/h ±15 % | ✅ |
-| Tempo Brückenschuss | Ø 96 (91–105) km/h | 90–110 km/h ±15 % | ✅ |
-| Tempo Gschöss | Ø 108 (99–138) km/h | 90–110 km/h ±15 % | ✅ |
-| Tempo Alte Schneise | Ø 104 (72–139) km/h | 110–125 km/h ±15 % | ✅ |
-| Tempo Seidlalmsprung | Ø 98 (76–108) km/h | 80–90 km/h ±15 % | ✅ |
-| Tempo Lärchenschuss | Ø 107 (100–114) km/h | 100–110 km/h ±15 % | ✅ |
-| Tempo Oberhausberg | Ø 100 (75–112) km/h | 60–80 km/h ±15 % | ⚠️ |
-| Tempo Hausbergkante | Ø 80 (66–99) km/h | 90–105 km/h ±15 % | ✅ |
-| Tempo Traverse | Ø 111 (87–150) km/h | 90–105 km/h ±15 % | ✅ |
-| Tempo Zielsprung | Ø 132 (134–139) km/h | 120–145 km/h ±15 % | ✅ |
-| Determinismus (2 Läufe) | 115.2860 / 115.2860 s | identisch | ✅ |
+| Höchsttempo | 152.8 km/h | ≤ 153 km/h | ✅ |
+| Spitzen-g (Boden) | 3.60 g bei s=2758 | ≤ 3,8 g | ✅ |
+| 100 km/h nach dem Start | 8.2 s (s=144 m) | ≈ 8,5 s | ✅ |
+| Sprung Mausefalle | 45 m bei 94 km/h, Landung 1.5 m | 40–65 m | ✅ |
+| Sprung Seidlalmsprung | 26 m bei 76 km/h, Landung 0.8 m | 15–45 m | ✅ |
+| Sprung Hausbergkante | 31 m bei 80 km/h, Landung 1.2 m | 15–45 m | ✅ |
+| Sprung Zielsprung | 53 m bei 128 km/h, Landung 0.6 m | 40–65 m | ✅ |
+| Tempo Mausefalle | Ø 117 (113–123) km/h | 105–120 km/h ±15 % | ✅ |
+| Tempo Karussell | Ø 65 (40–98) km/h | 60–80 km/h ±15 % | ✅ |
+| Tempo Steilhang | Ø 77 (45–94) km/h | 90–100 km/h ±15 % | ✅ |
+| Tempo Brückenschuss | Ø 98 (92–108) km/h | 90–110 km/h ±15 % | ✅ |
+| Tempo Gschöss | Ø 111 (102–140) km/h | 90–110 km/h ±15 % | ✅ |
+| Tempo Alte Schneise | Ø 106 (73–141) km/h | 110–125 km/h ±15 % | ✅ |
+| Tempo Seidlalmsprung | Ø 98 (76–109) km/h | 80–90 km/h ±15 % | ✅ |
+| Tempo Lärchenschuss | Ø 109 (103–116) km/h | 100–110 km/h ±15 % | ✅ |
+| Tempo Oberhausberg | Ø 100 (79–114) km/h | 60–80 km/h ±15 % | ⚠️ |
+| Tempo Hausbergkante | Ø 78 (66–97) km/h | 90–105 km/h ±15 % | ✅ |
+| Tempo Traverse | Ø 112 (87–152) km/h | 90–105 km/h ±15 % | ✅ |
+| Tempo Zielsprung | Ø 133 (135–140) km/h | 120–145 km/h ±15 % | ✅ |
+| Determinismus (2 Läufe) | 114.3450 / 114.3450 s | identisch | ✅ |
 
-Zwischenzeiten: 0:13.13, 0:33.05, 0:57.63, 1:21.24, 1:35.51
+Zwischenzeiten: 0:13.09, 0:32.97, 0:57.03, 1:20.42, 1:34.62
 
 | Abschnitt | s | Zeit | Ø km/h | min | max |
 |---|---|---|---|---|---|
-| Start | 0–182 | 9.79 s | 67 | 22 | 119 |
-| Mausefalle | 182–256 | 2.27 s | 117 | 112 | 123 |
-| Kompression | 256–396 | 5.92 s | 85 | 37 | 112 |
-| Karussell | 396–522 | 7.00 s | 65 | 39 | 98 |
-| Steilhang | 522–710 | 8.82 s | 77 | 46 | 94 |
-| Brückenschuss | 710–1046 | 12.54 s | 96 | 91 | 105 |
-| Gschöss | 1046–1372 | 10.87 s | 108 | 99 | 138 |
-| Alte Schneise | 1372–1598 | 7.80 s | 104 | 72 | 139 |
-| Seidlalmsprung | 1598–2014 | 15.31 s | 98 | 76 | 108 |
-| Lärchenschuss | 2014–2310 | 9.99 s | 107 | 100 | 114 |
-| Oberhausberg | 2310–2420 | 3.96 s | 100 | 75 | 112 |
-| Hausbergkante | 2420–2576 | 7.01 s | 80 | 66 | 99 |
-| Traverse | 2576–2790 | 6.92 s | 111 | 87 | 150 |
-| Zielhang | 2790–2950 | 4.43 s | 130 | 125 | 151 |
-| Zielsprung | 2950–3060 | 3.00 s | 132 | 134 | 139 |
+| Start | 0–182 | 9.74 s | 67 | 22 | 119 |
+| Mausefalle | 182–256 | 2.27 s | 117 | 113 | 123 |
+| Kompression | 256–396 | 5.91 s | 85 | 38 | 113 |
+| Karussell | 396–522 | 6.98 s | 65 | 40 | 98 |
+| Steilhang | 522–710 | 8.79 s | 77 | 45 | 94 |
+| Brückenschuss | 710–1046 | 12.31 s | 98 | 92 | 108 |
+| Gschöss | 1046–1372 | 10.60 s | 111 | 102 | 140 |
+| Alte Schneise | 1372–1598 | 7.67 s | 106 | 73 | 141 |
+| Seidlalmsprung | 1598–2014 | 15.23 s | 98 | 76 | 109 |
+| Lärchenschuss | 2014–2310 | 9.76 s | 109 | 103 | 116 |
+| Oberhausberg | 2310–2420 | 3.96 s | 100 | 79 | 114 |
+| Hausbergkante | 2420–2576 | 7.19 s | 78 | 66 | 97 |
+| Traverse | 2576–2790 | 6.88 s | 112 | 87 | 152 |
+| Zielhang | 2790–2950 | 4.40 s | 131 | 126 | 153 |
+| Zielsprung | 2950–3060 | 2.98 s | 133 | 135 | 140 |
 
-Flugphasen > 15 m: s=138 41 m (96 km/h, Landung 1.1 m), s=175 17 m (119 km/h, Landung 0.4 m), s=1209 19 m (100 km/h, Landung 0.1 m), s=1548 20 m (72 km/h, Landung 0.5 m), s=1571 28 m (76 km/h, Landung 0.6 m), s=1671 20 m (103 km/h, Landung 0.6 m), s=2414 31 m (75 km/h, Landung 0.8 m), s=2878 49 m (126 km/h, Landung 0.5 m)
+Flugphasen > 15 m: s=129 45 m (94 km/h, Landung 1.5 m), s=171 23 m (117 km/h, Landung 1.0 m), s=1540 26 m (76 km/h, Landung 0.8 m), s=1571 31 m (77 km/h, Landung 0.9 m), s=1671 20 m (103 km/h, Landung 0.6 m), s=2404 31 m (80 km/h, Landung 1.2 m), s=2867 53 m (128 km/h, Landung 0.6 m)
 <!-- BOT-VALIDATION:END -->

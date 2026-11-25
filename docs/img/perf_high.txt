@@ -1,0 +1,18 @@
+preset=high resolution=1920x1080 renderer=forward_plus gpu=Intel(R) Iris(R) Xe Graphics (RPL-U)
+total: 43.8 fps avg, 22.8 ms avg, p99 35.0 ms (1% low 28.6 fps), 5007 frames, race 1:54.34
+avg per frame: gpu 22.4 ms, render cpu 4.7 ms, process 32.4 ms, physics 0.7 ms
+  Start          45.3 fps (1% low 36.3)
+  Mausefalle     52.2 fps (1% low 40.1)
+  Kompression    58.3 fps (1% low 44.0)
+  Karussell      45.3 fps (1% low 40.0)
+  Steilhang      43.6 fps (1% low 34.6)
+  Brückenschuss  46.7 fps (1% low 38.6)
+  Gschöss        47.5 fps (1% low 34.7)
+  Alte Schneise  48.5 fps (1% low 40.0)
+  Seidlalmsprung 48.9 fps (1% low 37.0)
+  Lärchenschuss  34.3 fps (1% low 28.0)
+  Oberhausberg   34.1 fps (1% low 30.0)
+  Hausbergkante  32.0 fps (1% low 25.0)
+  Traverse       33.7 fps (1% low 29.0)
+  Zielhang       39.3 fps (1% low 33.4)
+  Zielsprung     39.8 fps (1% low 34.0)

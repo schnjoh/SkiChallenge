@@ -38,7 +38,7 @@ func build() -> void:
 			else RenderingServer.SHADOW_CASTING_SETTING_OFF
 	terrain.set_clipmap_target(self)  # until a camera is assigned (avoids Terrain3D camera errors)
 	if tree_density > 0.0:
-		tree_count = TerrainBuilder.add_trees(terrain, track, tree_density, view_distance)
+		tree_count = TerrainBuilder.add_trees(terrain, track, tree_density, view_distance, quality >= 2)
 	if rings:
 		RingTerrain.build(track, self, "far", track.meta["core"], 256, [2, 8] as Array[int], [2500.0] as Array[float])
 		RingTerrain.build(track, self, "horizon", track.meta["far"], 116, [1] as Array[int], [] as Array[float])
@@ -84,6 +84,9 @@ func _build_environment() -> void:
 	sun.light_energy = 1.25
 	sun.light_color = Color(1.0, 0.97, 0.92)
 	sun.shadow_enabled = shadows
-	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS
+	# medium/low: one cascade and a 2048 atlas (the shadow pass dominated the GPU budget on Iris Xe)
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_2_SPLITS if quality >= 2 \
+			else DirectionalLight3D.SHADOW_ORTHOGONAL
+	RenderingServer.directional_shadow_atlas_set_size(4096 if quality >= 2 else 2048, true)
 	sun.directional_shadow_max_distance = [80.0, 120.0, 300.0][clampi(quality, 0, 2)]
 	add_child(sun)

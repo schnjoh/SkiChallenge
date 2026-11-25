@@ -1,17 +1,18 @@
 # PROGRESS.md
 
 ## Stand (2026-11-25)
-- Phase 0–3: **abgeschlossen** (Review Phase 2+3 umgesetzt: Konstanten in SkiTuning, Sonne SW, Eingabe-Fokus, Gelände verlassen).
-- **Phase 4 – Strecke: abgeschlossen** (Validierungs-Bot bestanden, 1:55,29; Review läuft/umgesetzt siehe unten).
-- Phase 5 – Spielablauf: **begonnen** – HUD, Ghost, Bestenliste, Wiederholung, Pause, Audio (prozedural) fertig.
+- Phase 0–4: **abgeschlossen** (Reviews Phase 2+3 und 4 umgesetzt).
+- Phase 5 – Spielablauf: **abgeschlossen** (Menü, Rennen/Training, HUD, Ghost, Bestenliste, Wiederholung,
+  Pause, prozedurale Sounds, Grafikeinstellungen, Credits-Screen).
+- Phase 6 – Feinschliff: **abgeschlossen** bis auf das 60-fps-Ziel auf „mittel“ (siehe Offene Punkte);
+  Schnee-Glitzern, Skispuren, Zuschauer, Performance gemessen, Export Linux + Windows funktioniert.
+- **Definition of Done erfüllt**: Streif spielbar Start→Ziel mit Zeitmessung, Ghost, Bestenliste; F1-Menü;
+  Validierungs-Bot bestanden; README erklärt Setup, Steuerung, Datenpipeline.
 
-## Exakt nächster Schritt (Phase 5)
-1. Hauptmenü (`scenes/main.tscn`, `scripts/ui/main_menu.gd`): Rennen, Training (Abschnittswahl), Bestenliste,
-   Einstellungen (Grafik/Audio/Name → `Session`), Credits-Screen aus `data/credits.json`, Beenden;
-   `run/main_scene` zurück auf `main.tscn`.
-2. Grafikeinstellungen live anwenden, Screenshots von Menü/HUD prüfen.
-3. Danach Phase 6: Schnee-Shader (Spuren/Glanz), Zuschauer im Zielbereich, Performance-Messung
-   (`screenshot_tour`), Export-Presets Linux/Windows (`data/*`, `resources/presets/*.json` einschließen), README.
+## Exakt nächster Schritt (optional, nach DoD)
+1. Performance „mittel“ auf stabile 60 fps: schlanker eigener Terrain-Shader oder Terrain3D-Material vereinfachen,
+   Baum-Impostoren, statische Geländeschatten (`docs/validation.md` §3).
+2. Bot schneller in Kurven (Zeit 1:54,3 liegt im Fenster, Abschnitte Steilhang/Hausbergkante eher langsam).
 
 ## Erledigt
 - Phase 0: Godot 4.7.2 + git-lfs nach ~/.local ohne sudo; venv mit rasterio (GDAL 3.12);
@@ -31,15 +32,25 @@
     `RaceTimer` (Torfolge, DSQ bei s > Tor + 25 m, interpolierte Zeiten); `CourseBarriers` (A/B-Netze, Bäume);
     `CourseBuilder` (Netz-Shader, Tore, Starthaus, Zielbogen ohne Marken); F2-Editor (`TrackEditor`).
   - Validierungs-Bot `BotRun`/`TrackValidation` (`scripts/tools/validate_track.gd`, GUT-Test): alle Kriterien grün.
+- Phase 5: `main_menu.gd` (Menü über dem Live-Gelände), `Session` (Einstellungen `user://settings.json`), `Hud`,
+  `PauseMenu`, `Ghost` (60 Hz, binär), `Leaderboard` (Top 10), Wiederholung, `RideAudio` (Wind/Kante/Publikum/Jubel).
+- Phase 6: Schnee-Glitzern (Injektion in den generierten Terrain3D-Shader), `SkiTrail`, `Spectators` (MultiMesh,
+  Jubel im Vertex-Shader), Qualitätsstufen, `perf_run.tscn`, `export_presets.cfg` (Linux/Windows, `data/*` +
+  Presets eingeschlossen, GUT/Tests/Tools ausgeschlossen); exportierter Linux-Build startet und lädt die Strecke.
 
 ## Build / Lint / Tests
-- Godot-Import fehlerfrei, GUT 47/47 grün, Smoketest 0 Fehler/Warnungen, Ruff sauber, `check_outputs` PASSED,
-  Validierung PASSED (1:55,29, Ø 100,6 km/h, max 151,5 km/h, 3,55 g, Mausefalle 41 m, Zielsprung 49 m).
+- Godot-Import fehlerfrei, GUT 49/49 grün, Smoketest 0 Fehler/Warnungen, Ruff sauber, `check_outputs` PASSED,
+  Validierung PASSED (1:54,34, Ø 101,4 km/h, max 152,8 km/h, 3,60 g, Mausefalle 45 m, Zielsprung 53 m).
+- Export: `godot --headless --export-release "Linux"|"Windows"` → `export/` (gitignored). Beim Export meldet das
+  Terrain3D-Export-Plugin headless einen harmlosen Skriptfehler (`get_version` auf Nil, erwartet ein Editor-Terrain).
 
 ## Offene Bugs / Auffälligkeiten
-- Bot-Zeit 1:55,3 liegt nahe der Obergrenze 1:56,7; mehr Kurventempo lässt den Bot Tore verpassen (Pure Pursuit).
-- Abschnittstempi Steilhang/Hausbergkante eher niedrig, Oberhausberg zu schnell (weiche Prüfung, ⚠️).
-- `resources/presets/standard.json` vor der Abgabe aus den aktuellen Standardwerten neu schreiben.
+- **Performance**: „mittel“ Ø 60–74 fps, 1 %-Low ~40–45 auf Iris Xe (Ziel stabile 60 nicht ganz erreicht);
+  „niedrig“ Ø 101 / 1 %-Low 58. Messungen thermisch ±15 %.
+- Mehr Kurventempo lässt den Bot Tore verpassen (Pure Pursuit); Abschnitte Steilhang/Hausbergkante eher langsam,
+  Oberhausberg zu schnell (weiche Prüfung, ⚠️).
+- Ghost-Zwischenzeiten werden per Index verglichen; nach Änderung der Splits in `gates.json` den Ghost löschen.
+- `standard.json` muss bei geänderten `SkiTuning`-Defaults neu geschrieben werden (zuletzt 2026-11-25).
 - Pistenbreiten in `config.SECTION_WIDTHS_M` geschätzt. Multipolygon-Gebäude fehlen in `buildings.json`.
 - Export-Ausschlüsse/-Einschlüsse (GUT, Terrain3D csharp/extras; `data/*` als Nicht-Ressourcen) in Phase 6.
 
@@ -84,3 +95,7 @@
 - Ghost-Datei binär (`user://ghosts/streif.ghost`, 60 Hz), Bestenliste `user://leaderboard.json` (Top 10).
 - Editierte Tore/Rennlinie: im Entwicklungs-Checkout direkt in `data/streif/`, im Export nach `user://tracks/streif/`.
 - Headless läuft ohne Audio (Dummy-Treiber würde Playback-Objekte beim Beenden lecken).
+- μ_Gleit 0,022 (gewachste Rennski) statt 0,03: Ø-Tempo-Prüfung strikt 101–107 km/h ohne Toleranz.
+- Bot springt 0,3 s vor den Kanten aus `jumps.json` vor (DESIGN §4.7).
+- Standard-Grafik = „mittel“; Schattenqualität „mittel“ ohne Gelände-/Baumschatten, 1 Kaskade, Atlas 2048.
+- Exportvorlagen offiziell von GitHub (nur Linux/Windows x86_64 entpackt nach `~/.local/share/godot/export_templates`).

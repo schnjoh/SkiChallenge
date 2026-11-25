@@ -30,7 +30,7 @@
           "url": "https://www.tirol.gv.at/data/"
         },
         {
-          "name": "© OpenStreetMap contributors (Streif-Rennstrecke, Gebäude)",
+          "name": "© OpenStreetMap contributors (Streif-Rennstrecke, Gebäude; abgeleitete Streckendateien unter ODbL)",
           "license": "ODbL 1.0",
           "url": "https://www.openstreetmap.org/copyright"
         }
@@ -63,6 +63,21 @@
           "name": "Horn-Koppe Snow (HDRI) – Grzegorz Wronkowski / Poly Haven",
           "license": "CC0",
           "url": "https://polyhaven.com/a/horn-koppe_snow"
+        }
+      ]
+    },
+    {
+      "heading": "Eigene Werke",
+      "entries": [
+        {
+          "name": "Fahrer, Bäume, Netze, Tore, Starthaus, Zielbogen, Zuschauer – per Code aus Primitiven",
+          "license": "Projekt",
+          "url": ""
+        },
+        {
+          "name": "Sounds (Wind, Kanten, Publikum, Jubel) – prozedural synthetisiert",
+          "license": "Projekt",
+          "url": ""
         }
       ]
     }

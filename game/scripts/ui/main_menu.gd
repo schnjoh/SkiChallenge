@@ -292,6 +292,20 @@ func _build_credits() -> void:
 				l.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 				l.custom_minimum_size = Vector2(560, 0)
 				list.add_child(l)
+	# engine license and third-party notices (required for exported builds)
+	list.add_child(_label("Godot Engine", 20, Color(1.0, 0.8, 0.35)))
+	var lic: Label = _label(Engine.get_license_text(), 13, Color(0.85, 0.88, 0.95))
+	lic.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	lic.custom_minimum_size = Vector2(560, 0)
+	list.add_child(lic)
+	var parts: PackedStringArray = PackedStringArray()
+	for info: Dictionary in Engine.get_copyright_info():
+		parts.append(str(info["name"]))
+	var cp: Label = _label("Enthaltene Drittkomponenten der Engine: " + ", ".join(parts) +
+			"\nVollständige Lizenztexte: Engine.get_license_info() / godotengine.org/license", 13, Color(0.85, 0.88, 0.95))
+	cp.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	cp.custom_minimum_size = Vector2(560, 0)
+	list.add_child(cp)
 	v.add_child(_button("Zurück", func() -> void: _show("main")))
 
 

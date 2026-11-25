@@ -114,7 +114,8 @@ static func _assets() -> Terrain3DAssets:
 
 
 ## Places tree instances (trees.bin) through Terrain3D's instancer (LOD + chunked MultiMeshes).
-static func add_trees(t: Terrain3D, track: TrackData, density: float = 1.0, view_distance: float = 1.0) -> int:
+static func add_trees(t: Terrain3D, track: TrackData, density: float = 1.0, view_distance: float = 1.0,
+		shadows: bool = true) -> int:
 	var bytes: PackedByteArray = FileAccess.get_file_as_bytes(track.dir.path_join("trees.bin"))
 	var vals: PackedFloat32Array = bytes.to_float32_array()
 	var ma: Terrain3DMeshAsset = Terrain3DMeshAsset.new()
@@ -123,7 +124,7 @@ static func add_trees(t: Terrain3D, track: TrackData, density: float = 1.0, view
 	ma.lod0_range = 180.0
 	ma.lod1_range = 2500.0 * view_distance
 	ma.last_shadow_lod = 0
-	ma.cast_shadows = RenderingServer.SHADOW_CASTING_SETTING_ON
+	ma.cast_shadows = RenderingServer.SHADOW_CASTING_SETTING_ON if shadows else RenderingServer.SHADOW_CASTING_SETTING_OFF
 	t.assets.set_mesh_asset(0, ma)
 	var rng: RandomNumberGenerator = RandomNumberGenerator.new()
 	rng.seed = 4711

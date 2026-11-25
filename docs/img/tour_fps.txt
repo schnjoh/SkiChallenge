@@ -1,6 +1,6 @@
-start: s=0 fps=49.0
-mausefalle: s=182 fps=51.0
-steilhang: s=522 fps=53.8
-hausbergkante: s=2420 fps=54.0
-ziel: s=2950 fps=60.4
-overview: s=1598 fps=43.1
+start: s=0 fps=45.2
+mausefalle: s=182 fps=49.7
+steilhang: s=522 fps=51.4
+hausbergkante: s=2420 fps=50.7
+ziel: s=2950 fps=56.3
+overview: s=1598 fps=40.0
