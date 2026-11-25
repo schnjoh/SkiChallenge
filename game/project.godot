@@ -12,8 +12,12 @@ config_version=5
 
 config/name="Schussfahrt"
 config/description="Ski-Abfahrtsspiel auf echten Geländedaten"
-run/main_scene="res://scenes/main.tscn"
+run/main_scene="res://scenes/game.tscn"
 config/features=PackedStringArray("4.7", "Forward Plus")
+
+[autoload]
+
+GameInput="*res://scripts/game_input.gd"
 
 [debug]
 

@@ -10,6 +10,7 @@ extends Resource
 @export_range(0.2, 1.2, 0.01, "suffix:m²") var cda_upright: float = 0.55
 @export_range(0.3, 2.0, 0.01, "suffix:m²") var cda_brake: float = 0.95
 @export_range(0.5, 10.0, 0.1, "suffix:1/s") var tuck_rate: float = 4.0
+@export_range(0.0, 12.0, 0.1, "suffix:m/s") var start_speed: float = 6.0  ## skating out of the start gate
 
 @export_group("Schnee & Reibung")
 @export_range(0.0, 0.2, 0.001) var mu_glide: float = 0.03
